@@ -1,0 +1,6 @@
+---
+Bug-Database: https://trac.osgeo.org/geos/report
+#Bug-Submit: https://trac.osgeo.org/geos/newticket
+Registration: https://www.osgeo.org/cgi-bin/ldap_create_user.py
+Repository: https://git.osgeo.org/gitea/geos/geos.git
+Repository-Browse: https://git.osgeo.org/gitea/geos/geos
