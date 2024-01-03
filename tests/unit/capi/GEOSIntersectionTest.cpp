@@ -13,8 +13,6 @@ namespace tut {
 struct test_capigeosintersection_data : public capitest::utility
 {
     test_capigeosintersection_data() {
-        GEOSWKTWriter_setTrim(wktw_, 1);
-        GEOSWKTWriter_setOutputDimension(wktw_, 3);
     }
 };
 
@@ -98,6 +96,53 @@ void object::test<4>
     GEOSNormalize(expected_);
     ensure(GEOSEqualsExact(expected_, geom3_, 0.00001));
 }
+
+// https://trac.osgeo.org/geos/ticket/1134
+template<>
+template<>
+void object::test<5>
+()
+{
+    geom1_ = GEOSGeomFromWKT("LINESTRING (nan 0.0000000000000000, 0.0000000000000000 1.0000000000000000, 1.0000000000000000 1.0000000000000000, 1.0000000000000000 0.0000000000000000, nan 0.0000000000000000)");
+    geom2_ = GEOSGeomFromWKT("POLYGON ((-86060443046427184.0000000000000000 20820223.5124294497072697, -86060443046427184.0000000000000000 -20820223.5124294497072697, -86060443004786720.0000000000000000 -20820223.5124294497072697, -86060443004786720.0000000000000000 20820223.5124294497072697, -86060443046427184.0000000000000000 20820223.5124294497072697))");
+
+    ensure(geom1_);
+    ensure(geom2_);
+
+    geom3_ = GEOSIntersection(geom1_, geom2_);
+    // No memory leaked
+}
+
+// https://trac.osgeo.org/geos/ticket/1134
+template<>
+template<>
+void object::test<6>
+()
+{
+    geom1_ = GEOSGeomFromWKT("LINESTRING (nan 0.0000000000000000, 0.0000000000000000 nan)");
+    geom2_ = GEOSGeomFromWKT("POLYGON ((-86060443046427184.0000000000000000 20820223.5124294497072697, -86060443046427184.0000000000000000 -20820223.5124294497072697, -86060443004786720.0000000000000000 -20820223.5124294497072697, -86060443004786720.0000000000000000 20820223.5124294497072697, -86060443046427184.0000000000000000 20820223.5124294497072697))");
+
+    ensure(geom1_);
+    ensure(geom2_);
+
+    geom3_ = GEOSIntersection(geom1_, geom2_);
+    // No memory leaked
+}
+
+// https://github.com/libgeos/geos/pull/790
+template<>
+template<>
+void object::test<7>
+()
+{
+    geom1_ = GEOSGeomFromWKT("POLYGON ((1 0, 1 1, 0 1, 0 0, 1 0))");
+    geom2_ = GEOSGeomFromWKT("POLYGON ((1 2, 1 3, 0 3, 0 2, 1 2))");
+
+    result_ = GEOSIntersection(geom1_, geom2_);
+
+    ensure(!std::fetestexcept(FE_INVALID));
+}
+
 
 } // namespace tut
 

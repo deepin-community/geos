@@ -6,15 +6,18 @@
 #include <utility.h>
 
 // geos
+#include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/Geometry.h>
 #include <geos/io/WKTReader.h>
 // #include <geos/io/WKTWriter.h>
 #include <geos/triangulate/polygon/PolygonTriangulator.h>
+#include <geos/util.h>
 
 // std
 #include <stdio.h>
 
 using geos::triangulate::polygon::PolygonTriangulator;
+using geos::geom::CoordinateSequence;
 using geos::geom::Geometry;
 
 namespace tut {
@@ -49,7 +52,10 @@ struct test_polygontriangulator_data {
         // std::cout << std::endl << "actual" << std::endl << *actual << std::endl;
         // std::cout << std::endl << "actualUnion" << std::endl << *actualUnion << std::endl;
         // std::cout << std::endl << "geom" << std::endl << *geom << std::endl;
-        ensure_equals_geometry(geom.get(), actualUnion.get());
+
+        // compare to fully noded verstion of input polygon
+        std::unique_ptr<Geometry> nodedGeom = geom->Union(geom.get());
+        ensure_equals_geometry(nodedGeom.get(), actualUnion.get());
     }
 
 };
@@ -90,7 +96,7 @@ void object::test<3>()
 {
     checkTri(
         "POLYGON ((10 90, 90 90, 90 20, 10 10, 10 90), (30 70, 80 70, 50 30, 30 70))",
-        "GEOMETRYCOLLECTION (POLYGON ((10 10, 10 90, 30 70, 10 10)), POLYGON ((80 70, 30 70, 10 90, 80 70)), POLYGON ((10 10, 30 70, 50 30, 10 10)), POLYGON ((80 70, 10 90, 90 90, 80 70)), POLYGON ((90 20, 10 10, 50 30, 90 20)), POLYGON ((80 70, 90 90, 90 20, 80 70)), POLYGON ((90 20, 50 30, 80 70, 90 20)))"
+        "GEOMETRYCOLLECTION (POLYGON ((10 10, 10 90, 50 30, 10 10)), POLYGON ((10 10, 50 30, 90 20, 10 10)), POLYGON ((10 90, 30 70, 50 30, 10 90)), POLYGON ((10 90, 80 70, 30 70, 10 90)), POLYGON ((10 90, 90 90, 80 70, 10 90)), POLYGON ((50 30, 80 70, 90 20, 50 30)), POLYGON ((80 70, 90 90, 90 20, 80 70)))"
         );
 }
 
@@ -100,8 +106,8 @@ template<>
 void object::test<4>()
 {
     checkTri(
-        "POLYGON ((10 90, 90 90, 90 10, 10 10, 10 90), (20 80, 50 70, 30 30, 20 80), (70 20, 50 70, 80 80, 70 20))",
-        "GEOMETRYCOLLECTION (POLYGON ((10 10, 10 90, 20 80, 10 10)), POLYGON ((50 70, 20 80, 10 90, 50 70)), POLYGON ((10 10, 20 80, 30 30, 10 10)), POLYGON ((30 30, 50 70, 70 20, 30 30)), POLYGON ((80 80, 50 70, 10 90, 80 80)), POLYGON ((90 10, 10 10, 30 30, 90 10)), POLYGON ((80 80, 10 90, 90 90, 80 80)), POLYGON ((90 10, 30 30, 70 20, 90 10)), POLYGON ((70 20, 80 80, 90 90, 70 20)), POLYGON ((90 90, 90 10, 70 20, 90 90)))"
+        "POLYGON ((10 10, 10 90, 90 90, 90 10, 10 10), (20 80, 30 30, 50 70, 20 80), (50 70, 70 20, 80 80, 50 70))",
+        "GEOMETRYCOLLECTION (POLYGON ((10 10, 10 90, 20 80, 10 10)), POLYGON ((30 30, 50 70, 70 20, 30 30)), POLYGON ((80 80, 50 70, 20 80, 80 80)), POLYGON ((20 80, 10 90, 90 90, 20 80)), POLYGON ((10 10, 20 80, 30 30, 10 10)), POLYGON ((80 80, 20 80, 90 90, 80 80)), POLYGON ((90 10, 10 10, 30 30, 90 10)), POLYGON ((70 20, 80 80, 90 90, 70 20)), POLYGON ((90 10, 30 30, 70 20, 90 10)), POLYGON ((70 20, 90 90, 90 10, 70 20)))"
         );
 }
 
@@ -122,7 +128,7 @@ template<>
 void object::test<6>()
 {
     checkTri(
-        "MULTIPOLYGON (((10 10, 20 50, 50 50, 40 20, 10 10)), ((20 60, 60 60, 90 20, 90 90, 20 60)), ((10 90, 10 70, 40 70, 50 90, 10 90)))",
+        "MULTIPOLYGON (((10 10, 20 50, 50 50, 40 20, 10 10)), ((10 70, 10 90, 50 90, 40 70, 10 70)), ((20 60, 90 90, 90 20, 60 60, 20 60)))",
         "GEOMETRYCOLLECTION (POLYGON ((10 10, 20 50, 50 50, 10 10)), POLYGON ((50 50, 40 20, 10 10, 50 50)), POLYGON ((90 90, 90 20, 60 60, 90 90)), POLYGON ((60 60, 20 60, 90 90, 60 60)), POLYGON ((10 70, 10 90, 50 90, 10 70)), POLYGON ((50 90, 40 70, 10 70, 50 90)))"
         );
 }
@@ -181,6 +187,99 @@ void object::test<11>()
         );
 }
 
+//
+template<>
+template<>
+void object::test<12>()
+{
+    auto shell_seq = geos::detail::make_unique<CoordinateSequence>(CoordinateSequence{Coordinate{0, 0}, Coordinate{0, 10}, Coordinate{3, 10}, Coordinate{3, 0}, Coordinate{0, 0}});
+    auto hole_1_seq = geos::detail::make_unique<CoordinateSequence>(CoordinateSequence{Coordinate{1, 1}, Coordinate{2, 1}, Coordinate{2, 2}, Coordinate{1, 2}, Coordinate{1, 1}});
+    auto hole_2_seq = geos::detail::make_unique<CoordinateSequence>(CoordinateSequence{Coordinate{1, 8}, Coordinate{1, 9}, Coordinate{2, 9}, Coordinate{2, 8}, Coordinate{1, 8}});
+
+    auto* geom_factory = geos::geom::GeometryFactory::getDefaultInstance();
+
+    auto shell_ring  = geom_factory->createLinearRing(std::move(shell_seq));
+    auto hole_1_ring = geom_factory->createLinearRing(std::move(hole_1_seq));
+    auto hole_2_ring = geom_factory->createLinearRing(std::move(hole_2_seq));
+
+    std::vector<std::unique_ptr<geos::geom::LinearRing>> holes;
+    holes.emplace_back(std::move(hole_1_ring));
+    holes.emplace_back(std::move(hole_2_ring));
+
+    auto polygon = geom_factory->createPolygon(std::move(shell_ring), std::move(holes));
+
+    // std::cout << "Before triangulate()" << std::endl;
+
+    auto triangles = geos::triangulate::polygon::PolygonTriangulator::triangulate(polygon.get());
+
+    // std::cout << "After triangulate()" << std::endl;
+    // geos::io::WKTWriter writer;
+    // std::cout << writer.write(triangles.get()) << std::endl;
+
+    ensure(true);
+}
+
+
+/**
+ * A failing case revealing that joining holes by a zero-length cut
+ * was introducing duplicate vertices.
+ */
+template<>
+template<>
+void object::test<13>()
+{
+    checkTri(
+        "POLYGON ((71 12, 0 0, 7 47, 16 94, 71 52, 71 12), (7 38, 25 48, 7 47, 7 38), (13 59, 13 54, 26 53, 13 59))"
+    );
+}
+
+
+/**
+* A failing case for hole joining with two touching holes.
+* Fails due to PolygonHoleJoiner not handling holes which have same leftmost vertex.
+* Note that input is normalized.
+*/
+// testBadHoleJoinTouchingHoles
+template<>
+template<>
+void object::test<14>()
+{
+    checkTri(
+        "POLYGON ((0 0, 0 9, 9 9, 9 0, 0 0), (1 4, 5 1, 5 4, 1 4), (1 4, 5 5, 6 8, 1 4))"
+    );
+}
+
+// testBadHoleJoinHolesTouchVertical
+template<>
+template<>
+void object::test<15>()
+{
+    checkTri(
+        "POLYGON ((1 9, 9 9, 9 0, 1 0, 1 9), (1 4, 5 1, 5 4, 1 4), (1 5, 5 5, 6 8, 1 5))"
+    );
+}
+
+// testBadHoleJoinHoleTouchesShellVertical
+template<>
+template<>
+void object::test<16>()
+{
+    checkTri(
+        "POLYGON ((1 9, 9 9, 9 0, 1 0, 1 9), (1 5, 5 5, 6 8, 1 5))",
+        "GEOMETRYCOLLECTION (POLYGON ((1 0, 1 5, 5 5, 1 0)), POLYGON ((6 8, 1 5, 1 9, 6 8)), POLYGON ((9 9, 9 0, 1 0, 9 9)), POLYGON ((6 8, 1 9, 9 9, 6 8)), POLYGON ((9 9, 1 0, 5 5, 9 9)), POLYGON ((5 5, 6 8, 9 9, 5 5)))"
+    );
+}
+
+// testBadHoleJoinHoleTouchesShell
+template<>
+template<>
+void object::test<17>()
+{
+    checkTri(
+        "POLYGON ((5 5, 9 5, 9 0, 0 0, 5 5), (3 3, 6 1, 5 3, 3 3))",
+        "GEOMETRYCOLLECTION (POLYGON ((0 0, 3 3, 6 1, 0 0)), POLYGON ((5 3, 3 3, 5 5, 5 3)), POLYGON ((5 5, 9 5, 9 0, 5 5)), POLYGON ((9 0, 0 0, 6 1, 9 0)), POLYGON ((6 1, 5 3, 5 5, 6 1)), POLYGON ((5 5, 9 0, 6 1, 5 5)))"
+    );
+}
+
+
 } // namespace tut
-
-

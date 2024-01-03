@@ -23,10 +23,11 @@ Copyright:        1995, INRIA Prisme Project
                   2019, Nicklas Larsson
              2009-2020, Sandro Santilli <strk@kbt.io>
                   2020, Crunchy Data
-             2016-2021, Daniel Baston
-             2018-2021, Paul Ramsey <pramsey@cleverlephant.ca>
-  2010-2012, 2019-2021, Martin Davis <mtnclimb@gmail.com>
                   2021, Jared Erickson
+             2016-2022, Daniel Baston
+  2010-2012, 2019-2023, Martin Davis <mtnclimb@gmail.com>
+             2018-2023, Paul Ramsey <pramsey@cleverlephant.ca>
+             2022-2023, ISciences LLC
 License: LGPL-2.1+
 Comment: The upstream contributors are listed in the AUTHORS file.
 
@@ -156,4 +157,3 @@ License: zlib
  .
  3. This notice may not be removed or altered from any source
  distribution.
-

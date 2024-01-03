@@ -1,8 +1,8 @@
 //
 // GEOS Unit Test utilities, extension of TUT Framework namespace
 //
-#ifndef GEOS_TUT_UTILITY_H_INCLUDED
-#define GEOS_TUT_UTILITY_H_INCLUDED
+#pragma once
+
 
 // tut
 #include <tut/tut.hpp>
@@ -10,9 +10,6 @@
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryCollection.h>
 #include <geos/geom/Coordinate.h>
-#include <geos/geom/CoordinateArraySequence.h>
-#include <geos/geom/CoordinateArraySequenceFactory.h>
-#include <geos/geom/CoordinateSequenceFactory.h>
 #include <geos/geom/Dimension.h>
 #include <geos/geom/Point.h>
 #include <geos/geom/Polygon.h>
@@ -33,6 +30,16 @@
 #include <string>
 #include <vector>
 
+using geos::geom::Coordinate;
+using geos::geom::CoordinateSequence;
+using geos::geom::Geometry;
+using geos::geom::GeometryFactory;
+using geos::geom::LineString;
+using geos::geom::LinearRing;
+using geos::geom::Polygon;
+using geos::io::WKTReader;
+using geos::io::WKTWriter;
+
 namespace tut {
 
 //
@@ -43,9 +50,6 @@ typedef geos::geom::Coordinate const* CoordinateCPtr;
 
 typedef geos::geom::CoordinateSequence* CoordSeqPtr;
 typedef geos::geom::CoordinateSequence const* CoordSeqCPtr;
-
-typedef geos::geom::CoordinateArraySequence* CoordArrayPtr;
-typedef geos::geom::CoordinateArraySequence const* CoordArrayCPtr;
 
 typedef geos::geom::Geometry* GeometryPtr;
 typedef geos::geom::Geometry const* GeometryCPtr;
@@ -93,8 +97,25 @@ instanceOf(InstanceType const* instance)
 }
 
 inline void
+ensure_equals_xy(geos::geom::Coordinate const& actual,
+                  geos::geom::Coordinate const& expected)
+{
+    ensure_equals("Coordinate X", actual.x, expected.x );
+    ensure_equals("Coordinate Y", actual.y, expected.y );
+}
+
+inline void
+ensure_equals_xy(geos::geom::Coordinate const& actual,
+                  geos::geom::Coordinate const& expected,
+                  double tol)
+{
+    ensure_equals("Coordinate X", actual.x, expected.x, tol );
+    ensure_equals("Coordinate Y", actual.y, expected.y, tol );
+}
+
+inline void
 ensure_equals_xyz(geos::geom::Coordinate const& actual,
-                 geos::geom::Coordinate const& expected)
+                  geos::geom::Coordinate const& expected)
 {
     ensure_equals("Coordinate X", actual.x, expected.x );
     ensure_equals("Coordinate Y", actual.y, expected.y );
@@ -105,7 +126,50 @@ ensure_equals_xyz(geos::geom::Coordinate const& actual,
     }
 }
 
+inline void
+ensure_equals_xym(geos::geom::CoordinateXYM const& actual,
+                  geos::geom::CoordinateXYM const& expected)
+{
+    ensure_equals("Coordinate X", actual.x, expected.x );
+    ensure_equals("Coordinate Y", actual.y, expected.y );
+    if ( std::isnan(expected.m) ) {
+        ensure("Coordinate M should be NaN", std::isnan(actual.m) );
+    } else {
+        ensure_equals("Coordinate M", actual.m, expected.m );
+    }
+}
 
+inline void
+ensure_equals_xyzm(geos::geom::CoordinateXYZM const& actual,
+                   geos::geom::CoordinateXYZM const& expected)
+{
+    ensure_equals("Coordinate X", actual.x, expected.x );
+    ensure_equals("Coordinate Y", actual.y, expected.y );
+    if ( std::isnan(expected.z) ) {
+        ensure("Coordinate Z should be NaN", std::isnan(actual.z) );
+    } else {
+        ensure_equals("Coordinate Z", actual.z, expected.z );
+    }
+    if ( std::isnan(expected.m) ) {
+        ensure("Coordinate M should be NaN", std::isnan(actual.m) );
+    } else {
+        ensure_equals("Coordinate M", actual.m, expected.m );
+    }
+}
+
+inline void ensure_same(const char* msg, double a, double b)
+{
+    if (std::isnan(a) && std::isnan(b)) {
+        return;
+    }
+
+    ensure_equals(msg, a, b);
+}
+
+inline void ensure_same(double a, double b)
+{
+    ensure_same("values are not equal", a, b);
+}
 
 //
 // Geometries structure comparators
@@ -135,6 +199,7 @@ ensure_equals_geometry(T const* lhs_in, T const* rhs_in, double tolerance = 0.0)
 
     using geos::geom::Polygon;
     using geos::geom::GeometryCollection;
+    using geos::io::WKTWriter;
 
     // Take clones so we can normalize them
     std::unique_ptr<geos::geom::Geometry> lhs = lhs_in->clone();
@@ -166,17 +231,19 @@ ensure_equals_geometry(T const* lhs_in, T const* rhs_in, double tolerance = 0.0)
     ensure_equals("boundary dimension do not match",
                   lhs->getBoundaryDimension(), rhs->getBoundaryDimension());
 
-    // NOTE - mloskot: Intentionally disabled, so simplified geometry
-    // can be compared to its original
-    ensure_equals("number of points do not match",
-                  lhs->getNumPoints(), rhs->getNumPoints());
+    bool areaNumPointsEqual = lhs->getNumPoints() == rhs->getNumPoints();
+    bool areCoordsEqual = lhs->equalsExact(rhs.get(), tolerance);
 
-    bool areEqual = lhs->equalsExact(rhs.get(), tolerance);
-    if(!areEqual) {
-        std::cout << std::endl << rhs->toText() << std::endl << lhs->toText() << std::endl;
+    if(! (areCoordsEqual && areaNumPointsEqual)) {
+        WKTWriter writer;
+        std::cout << std::endl
+            << writer.write(*rhs) << std::endl
+            << writer.write(*lhs) << std::endl;
     }
 
-    ensure("coordinates do not match", areEqual);
+    ensure("number of points do not match", areaNumPointsEqual);
+
+    ensure("coordinates do not match", areCoordsEqual);
     // Dispatch to run more specific testes
     // if(isInstanceOf<Polygon>(lhs)
     //         && isInstanceOf<Polygon>(rhs)) {
@@ -258,8 +325,8 @@ ensure_equals_dims(T const *, T const *,
 
 template <>
 inline void
-ensure_equals_dims(const geos::geom::CoordinateSequence *seq1,
-                   const geos::geom::CoordinateSequence *seq2,
+ensure_equals_dims(const geos::geom::CoordinateSequence* seq1,
+                   const geos::geom::CoordinateSequence* seq2,
                    unsigned int dims, double tolerance)
 {
     assert(nullptr != seq1);
@@ -319,12 +386,82 @@ ensure_equals_exact_geometry_xyz(const geos::geom::Geometry *lhs_in,
       return ensure_equals_dims( gln1->getCoordinatesRO(), gln2->getCoordinatesRO(), 3, tolerance);
     }
     else if (dynamic_cast<const Polygon *>(lhs_in)) {
-      assert("Not implemented yet" == 0);
+      ensure("Not implemented yet", 0);
     }
     else if (const GeometryCollection* gc1 = dynamic_cast<const GeometryCollection *>(lhs_in)) {
       const GeometryCollection *gc2 = static_cast<const GeometryCollection *>(rhs_in);
       for (unsigned int i = 0; i < gc1->getNumGeometries(); i++) {
         ensure_equals_exact_geometry_xyz(gc1->getGeometryN(i), gc2->getGeometryN(i), tolerance);
+      }
+    }
+}
+
+inline void
+ensure_equals_exact_xyzm(const geos::geom::CoordinateSequence* seq1,
+             const geos::geom::CoordinateSequence* seq2,
+             double tol)
+{
+    ensure_equals("hasZ not equal", seq1->hasZ(), seq2->hasZ());
+    ensure_equals("hasM not equal", seq1->hasM(), seq2->hasM());
+    ensure_equals("size not equal", seq1->getSize(), seq2->getSize());
+
+    geos::geom::CoordinateXYZM c1, c2;
+    for (std::size_t i = 0; i < seq1->getSize(); i++) {
+        seq1->getAt(i, c1);
+        seq2->getAt(i, c2);
+
+        ensure("xy not in tolerance", c1.distance(c2) <= tol);
+        ensure_same("z not same", c1.z, c2.z);
+        ensure_same("z not same", c1.m, c2.m);
+    }
+}
+
+inline void
+ensure_equals_exact_geometry_xyzm(const geos::geom::Geometry *lhs_in,
+                                  const geos::geom::Geometry *rhs_in,
+                                  double tolerance)
+{
+    assert(nullptr != lhs_in);
+    assert(nullptr != rhs_in);
+
+    using geos::geom::Point;
+    using geos::geom::LineString;
+    using geos::geom::Polygon;
+    using geos::geom::CoordinateSequence;
+    using geos::geom::GeometryCollection;
+
+    ensure_equals("type id do not match",
+                  lhs_in->getGeometryTypeId(), rhs_in->getGeometryTypeId());
+
+    if (const Point* gpt1 = dynamic_cast<const Point *>(lhs_in)) {
+      const Point *gpt2 = static_cast<const Point *>(rhs_in);
+      return ensure_equals_exact_xyzm(gpt1->getCoordinatesRO(), gpt2->getCoordinatesRO(), tolerance);
+    }
+    else if (const LineString* gln1 = dynamic_cast<const LineString *>(lhs_in)) {
+      const LineString *gln2 = static_cast<const LineString *>(rhs_in);
+      return ensure_equals_exact_xyzm(gln1->getCoordinatesRO(), gln2->getCoordinatesRO(), tolerance);
+    }
+    else if (const Polygon* gply1 = dynamic_cast<const Polygon*>(lhs_in)) {
+      const Polygon* gply2 = static_cast<const Polygon*>(rhs_in);
+      const LinearRing* extRing1 = gply1->getExteriorRing();
+      const LinearRing* extRing2 = gply2->getExteriorRing();
+
+      ensure_equals_exact_geometry_xyzm(extRing1, extRing2, tolerance);
+
+      ensure_equals("number of holes does not match",
+                    gply1->getNumInteriorRing(),
+                    gply2->getNumInteriorRing());
+
+      for (std::size_t i = 0; i < gply1->getNumInteriorRing(); i++) {
+        ensure_equals_exact_geometry_xyzm(gply1->getInteriorRingN(i),
+                                    gply2->getInteriorRingN(i),
+                                    tolerance);
+      }
+    }
+    else if (const GeometryCollection* gc1 = dynamic_cast<const GeometryCollection *>(lhs_in)) {
+      const GeometryCollection *gc2 = static_cast<const GeometryCollection *>(rhs_in);
+      for (unsigned int i = 0; i < gc1->getNumGeometries(); i++) {
+        ensure_equals_exact_geometry_xyzm(gc1->getGeometryN(i), gc2->getGeometryN(i), tolerance);
       }
     }
 }
@@ -340,6 +477,23 @@ ensure_equals_geometry_xyz(const T *lhs_in,
     std::unique_ptr<geos::geom::Geometry> g2 = rhs_in->clone();
     g2->normalize();
     ensure_equals_exact_geometry_xyz(g1.get(), g2.get(), tolerance);
+}
+
+template <typename T>
+inline void
+ensure_equals_geometry_xyzm(const T *lhs_in,
+                           const T *rhs_in,
+                           double tolerance=0.0)
+{
+    ensure_equals("hasZ is not consistent", lhs_in->hasZ(), rhs_in->hasZ());
+    ensure_equals("hasM is not consistent", lhs_in->hasM(), rhs_in->hasM());
+
+    std::unique_ptr<geos::geom::Geometry> g1 = lhs_in->clone();
+    g1->normalize();
+    std::unique_ptr<geos::geom::Geometry> g2 = rhs_in->clone();
+    g2->normalize();
+
+    ensure_equals_exact_geometry_xyzm(g1.get(), g2.get(), tolerance);
 }
 
 /*
@@ -375,7 +529,7 @@ ensure_equals_exact_geometry(const geos::geom::Geometry *lhs_in,
       return ensure_equals_dims( gln1->getCoordinatesRO(), gln2->getCoordinatesRO(), 2, tolerance);
     }
     else if (dynamic_cast<const Polygon *>(lhs_in)) {
-      assert("Not implemented yet" == 0);
+      ensure("Not implemented yet", 0);
     }
     else if (const GeometryCollection* gc1 = dynamic_cast<const GeometryCollection *>(lhs_in)) {
       const GeometryCollection *gc2 = static_cast<const GeometryCollection *>(rhs_in);
@@ -410,4 +564,3 @@ struct wkb_hex_decoder {
 
 } // namespace tut
 
-#endif // #ifndef GEOS_TUT_UTILITY_H_INCLUDED

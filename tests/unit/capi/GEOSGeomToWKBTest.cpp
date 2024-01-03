@@ -41,7 +41,6 @@ struct test_capigeosgeomtowkb_data : public capitest::utility {
 
         GEOSWKTWriter* wktwriter = GEOSWKTWriter_create();
         GEOSWKTWriter_setRoundingPrecision(wktwriter, 3);
-        GEOSWKTWriter_setTrim(wktwriter, 1);
         GEOSWKTWriter_setOutputDimension(wktwriter, 3);
         char* wkt_c = GEOSWKTWriter_write(wktwriter, geom2_);
         GEOSWKTWriter_destroy(wktwriter);
@@ -149,7 +148,7 @@ template<>
 void object::test<10>
 ()
 {
-    test_wkb("MULTIPOINT (0 0, 5 5, 10 10, 15 15, 20 20)");
+    test_wkb("MULTIPOINT ((0 0), (5 5), (10 10), (15 15), (20 20))");
 }
 
 template<>

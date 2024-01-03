@@ -22,6 +22,7 @@ struct test_capigeosclipbyrect_data : public capitest::utility {
     void
     isEqual(GEOSGeom g, const char* exp_wkt)
     {
+        ensure(g);
         geom3_ = GEOSGeomFromWKT(exp_wkt);
         bool eq = GEOSEquals(geom3_, g) != 0;
         if(! eq) {
@@ -35,7 +36,6 @@ struct test_capigeosclipbyrect_data : public capitest::utility {
 
     test_capigeosclipbyrect_data()
     {
-        GEOSWKTWriter_setTrim(wktw_, 1);
         GEOSWKTWriter_setRoundingPrecision(wktw_, 8);
     }
 };
@@ -203,6 +203,31 @@ template<> template<> void object::test<15>
     isEqual(geom2_, "POLYGON ((2 2, 2 5, 5 5, 5 2, 2 2))");
 }
 
+/// Empty combinations - always return GEOMETRYCOLLECTION EMPTY
+template<> template<> void object::test<16>
+()
+{
+    std::vector<const char*> variants{
+        "POINT EMPTY",
+        "LINESTRING EMPTY",
+        "POLYGON EMPTY",
+        "MULTIPOINT EMPTY",
+        "MULTILINESTRING EMPTY",
+        "MULTIPOLYGON EMPTY",
+        "GEOMETRYCOLLECTION EMPTY",
+        "LINEARRING EMPTY",
+    };
+    for (const auto& wkt : variants) {
+        GEOSGeom geom1 = GEOSGeomFromWKT(wkt);
+        GEOSGeom geom2 = GEOSClipByRect(geom1, 0, 0, 1, 1);
+        char* obt_wkt = GEOSWKTWriter_write(wktw_, geom2);
+        std::string obt_wkt2(obt_wkt);
+        GEOSFree(obt_wkt);
+        GEOSGeom_destroy(geom1);
+        GEOSGeom_destroy(geom2);
+        ensure_equals(obt_wkt2, "GEOMETRYCOLLECTION EMPTY");
+    }
+}
 
 
 } // namespace tut

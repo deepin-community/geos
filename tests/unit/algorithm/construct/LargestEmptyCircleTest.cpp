@@ -7,7 +7,6 @@
 #include <geos/operation/distance/IndexedFacetDistance.h>
 #include <geos/algorithm/construct/LargestEmptyCircle.h>
 #include <geos/geom/Coordinate.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/Dimension.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
@@ -62,15 +61,33 @@ struct test_lec_data {
         ensure_equals("y coordinate does not match", lhs.y, rhs.y, tolerance);
     }
 
+    /**
+     * A coarse distance check, mainly testing
+     * that there is not a huge number of iterations.
+     * (This will be revealed by CI taking a very long time!)
+     */
     void
-    checkCircle(const Geometry *geom, double build_tolerance, double x, double y, double expectedRadius)
+    checkCircle(std::string wktObstacles, double tolerance)
+    {
+        std::unique_ptr<Geometry> geom(reader_.read(wktObstacles));
+        LargestEmptyCircle lec(geom.get(), tolerance);
+        std::unique_ptr<Point> centerPoint = lec.getCenter();
+        double dist = geom->distance(centerPoint.get());
+        //std::cout << dist << std::endl;
+        std::unique_ptr<LineString> radiusLine = lec.getRadiusLine();
+        double actualRadius = radiusLine->getLength();
+        ensure(std::abs(actualRadius - dist) < 2 * tolerance);
+    }
+
+    void
+    checkCircle(const Geometry *obstacles, const Geometry *boundary, double build_tolerance, double x, double y, double expectedRadius)
     {
         double tolerance = 2*build_tolerance;
-        LargestEmptyCircle lec(geom, tolerance);
+        LargestEmptyCircle lec(obstacles, boundary, tolerance);
         std::unique_ptr<Point> centerPoint = lec.getCenter();
-        const Coordinate* centerPt = centerPoint->getCoordinate();
+        Coordinate centerPt(*centerPoint->getCoordinate());
         Coordinate expectedCenter(x, y);
-        ensure_equals_coordinate(*centerPt, expectedCenter, tolerance);
+        ensure_equals_coordinate(centerPt, expectedCenter, tolerance);
         std::unique_ptr<LineString> radiusLine = lec.getRadiusLine();
         double actualRadius = radiusLine->getLength();
         ensure_equals("radius", actualRadius, expectedRadius, tolerance);
@@ -81,8 +98,8 @@ struct test_lec_data {
         // std::cout << writer_.write(geom) << std::endl;
         // std::cout << writer_.write(radiusLine.get()) << std::endl;
 
-        ensure_equals_coordinate(*centerPt, linePt0, tolerance);
-        const Coordinate radiusPt = *lec.getRadiusPoint()->getCoordinate();
+        ensure_equals_coordinate(centerPt, linePt0, tolerance);
+        Coordinate radiusPt(*lec.getRadiusPoint()->getCoordinate());
         ensure_equals_coordinate(radiusPt, linePt1, tolerance);
     }
 
@@ -91,7 +108,7 @@ struct test_lec_data {
     {
         LargestEmptyCircle lec(geom, tolerance);
         std::unique_ptr<Point> centerPoint = lec.getCenter();
-        const Coordinate* centerPt = centerPoint->getCoordinate();
+        Coordinate centerPt(*centerPoint->getCoordinate());
         std::unique_ptr<LineString> radiusLine = lec.getRadiusLine();
         double actualRadius = radiusLine->getLength();
         ensure_equals("radius", actualRadius, 0.0, tolerance);
@@ -99,8 +116,8 @@ struct test_lec_data {
         const Coordinate& linePt0 = radiusLine->getCoordinateN(0);
         const Coordinate& linePt1 = radiusLine->getCoordinateN(1);
 
-        ensure_equals_coordinate(*centerPt, linePt0, tolerance);
-        const Coordinate radiusPt = *lec.getRadiusPoint()->getCoordinate();
+        ensure_equals_coordinate(centerPt, linePt0, tolerance);
+        Coordinate radiusPt(*lec.getRadiusPoint()->getCoordinate());
         ensure_equals_coordinate(radiusPt, linePt1, tolerance);
     }
 
@@ -115,7 +132,15 @@ struct test_lec_data {
     checkCircle(std::string wkt, double tolerance, double x, double y, double expectedRadius)
     {
         std::unique_ptr<Geometry> geom(reader_.read(wkt));
-        checkCircle(geom.get(), tolerance, x, y, expectedRadius);
+        checkCircle(geom.get(), nullptr, tolerance, x, y, expectedRadius);
+    }
+
+    void
+    checkCircle(std::string wktObstacles, std::string wktBoundary, double tolerance, double x, double y, double expectedRadius)
+    {
+        std::unique_ptr<Geometry> obstacles(reader_.read(wktObstacles));
+        std::unique_ptr<Geometry> boundary(reader_.read(wktBoundary));
+        checkCircle(obstacles.get(), boundary.get(), tolerance, x, y, expectedRadius);
     }
 
 };
@@ -195,8 +220,8 @@ void object::test<6>
 ()
 {
 
-    checkCircle("MULTILINESTRING ((100 100, 200 150, 100 200, 250 250, 100 300, 300 350, 100 400), (50 400, 0 350, 50 300, 0 250, 50 200, 0 150, 50 100))",
-       0.01, 77.52, 349.99, 54.81 );
+    checkCircle("MULTILINESTRING ((100 100, 200 150, 100 200, 250 250, 100 300, 300 350, 100 400), (70 380, 0 350, 50 300, 0 250, 50 200, 0 150, 50 120))",
+       0.01, 77.52, 249.99, 54.81 );
 }
 
 //
@@ -236,7 +261,69 @@ void object::test<9>
        0.01 );
 }
 
+// testThinExtent
+template<>
+template<>
+void object::test<10>
+()
+{
+    checkCircle("MULTIPOINT ((100 100), (300 100), (200 100.1))",
+       0.01 );
+}
+
+// testBoundaryEmpty
+template<>
+template<>
+void object::test<11>
+()
+{
+ checkCircle("MULTIPOINT ((2 2), (8 8), (7 5))",
+        "POLYGON EMPTY",
+        0.01, 4.127, 4.127, 3 );
+}
+
+// testBoundarySquare
+template<>
+template<>
+void object::test<12>
+()
+{
+    checkCircle("MULTIPOINT ((2 2), (6 4), (8 8))",
+        "POLYGON ((1 9, 9 9, 9 1, 1 1, 1 9))",
+        0.01, 1.00390625, 8.99609375, 7.065 );
+}
+
+//testBoundarySquareObstaclesOutside
+template<>
+template<>
+void object::test<13>
+()
+{
+    checkCircle("MULTIPOINT ((10 10), (10 0))",
+        "POLYGON ((1 9, 9 9, 9 1, 1 1, 1 9))",
+        0.01, 1.0044, 4.997, 10.29 );
+}
+
+// testBoundaryMultiSquares
+template<>
+template<>
+void object::test<14>
+()
+{
+    checkCircle("MULTIPOINT ((10 10), (10 0), (5 5))",
+        "MULTIPOLYGON (((1 9, 9 9, 9 1, 1 1, 1 9)), ((15 20, 20 20, 20 15, 15 15, 15 20)))",
+        0.01, 19.995, 19.997, 14.137 );
+}
+
+// testBoundaryAsObstacle
+template<>
+template<>
+void object::test<15>
+()
+{
+    checkCircle("GEOMETRYCOLLECTION (POLYGON ((1 9, 9 9, 9 1, 1 1, 1 9)), POINT (4 3), POINT (7 6))",
+        "POLYGON ((1 9, 9 9, 9 1, 1 1, 1 9))",
+        0.01, 4, 6, 3 );
+}
 
 } // namespace tut
-
-

@@ -6,7 +6,6 @@
 // geos
 #include <geos/operation/valid/IsValidOp.h>
 #include <geos/geom/Coordinate.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/Dimension.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/LineString.h>
@@ -123,7 +122,7 @@ template<>
 void object::test<3>
 ()
 {
-    GeomPtr geom = fromWKT("POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1) ))");
+    GeomPtr geom = fromWKT("POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))");
     Polygon* poly = dynamic_cast<Polygon*>(geom.get());
     ensure(nullptr != poly);
     const LineString* ring = poly->getExteriorRing();
@@ -143,7 +142,7 @@ template<>
 void object::test<4>
 ()
 {
-    GeomPtr geom = fromWKT("POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1) ))");
+    GeomPtr geom = fromWKT("POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))");
     Polygon* poly = dynamic_cast<Polygon*>(geom.get());
     ensure(nullptr != poly);
     const LineString* ring = poly->getInteriorRingN(0);

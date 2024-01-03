@@ -36,7 +36,6 @@ struct test_lengthindexedline_data {
     test_lengthindexedline_data()
         : reader(), writer()
     {
-        writer.setTrim(true);
     }
 
     geos::io::WKTReader reader;
@@ -96,8 +95,8 @@ struct test_lengthindexedline_data {
     {
         GeomPtr input(reader.read(inputStr));
         GeomPtr testPoint(reader.read(testPtWKT));
-        const Coordinate* testPt = testPoint->getCoordinate();
-        bool resultOK = indexOfAfterCheck(input.get(), *testPt);
+        const Coordinate testPt(*testPoint->getCoordinate());
+        bool resultOK = indexOfAfterCheck(input.get(), testPt);
         ensure(resultOK);
     }
 
@@ -108,11 +107,11 @@ struct test_lengthindexedline_data {
         GeomPtr input(reader.read(inputWKT));
         GeomPtr testPoint(reader.read(testPtWKT));
         GeomPtr expectedPoint(reader.read(expectedPtWKT));
-        const Coordinate* testPt = testPoint->getCoordinate();
-        const Coordinate* expectedPt = expectedPoint->getCoordinate();
-        Coordinate offsetPt = extractOffsetAt(input.get(), *testPt, offsetDistance);
+        const Coordinate testPt(*testPoint->getCoordinate());
+        const Coordinate expectedPt(*expectedPoint->getCoordinate());
+        Coordinate offsetPt = extractOffsetAt(input.get(), testPt, offsetDistance);
 
-        bool isOk = offsetPt.distance(*expectedPt) < TOLERANCE_DIST;
+        bool isOk = offsetPt.distance(expectedPt) < TOLERANCE_DIST;
         if(! isOk) {
             cout << "Expected = " << *expectedPoint << "  Actual = " << offsetPt << endl;
         }
@@ -438,7 +437,7 @@ void object::test<25>
 ()
 {
 
-    GeomPtr linearGeom(reader.read("LINESTRING (0 0, 10 10 10)"));
+    GeomPtr linearGeom(reader.read("LINESTRING (0 0, 10 10)"));
     LengthIndexedLine indexedLine(linearGeom.get());
     double projIndex = indexedLine.project(Coordinate(5, 5));
     Coordinate projPt = indexedLine.extractPoint(projIndex);
@@ -520,5 +519,14 @@ void object::test<29>()
     ensure(pt.isNull());
 }
 
-} // namespace tut
+// testExtractLineIndexAtEndpointOfTouchingLines()
+template<>
+template<>
+void object::test<30>
+()
+{
+    runIndicesOfThenExtract("MULTILINESTRING((0 0, 0 50), (0 50, 0 100))",
+                            "LINESTRING (0 50, 0 60)");
+}
 
+} // namespace tut

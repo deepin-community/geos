@@ -21,7 +21,6 @@ namespace tut {
 struct test_capigeossnap_data : public capitest::utility {
     test_capigeossnap_data()
     {
-        GEOSWKTWriter_setTrim(wktw_, 1);
         GEOSWKTWriter_setRoundingPrecision(wktw_, 8);
     }
 };
@@ -130,7 +129,7 @@ void object::test<6>
 ()
 {
     geom1_ = GEOSGeomFromWKT("LINESTRING(0 3,4 1,0 1)");
-    geom2_ = GEOSGeomFromWKT("MULTIPOINT(5 0,4 1)");
+    geom2_ = GEOSGeomFromWKT("MULTIPOINT((5 0),(4 1))");
     geom3_ = GEOSSnap(geom1_, geom2_, 2);
 
     char* wkt_c = GEOSWKTWriter_write(wktw_, geom3_);
@@ -149,7 +148,7 @@ void object::test<7>
 ()
 {
     geom1_ = GEOSGeomFromWKT("LINESTRING(0 3,4 1,0 1)");
-    geom2_ = GEOSGeomFromWKT("MULTIPOINT(4 1,5 0)");
+    geom2_ = GEOSGeomFromWKT("MULTIPOINT((4 1),(5 0))");
     geom3_ = GEOSSnap(geom1_, geom2_, 2);
 
     char* wkt_c = GEOSWKTWriter_write(wktw_, geom3_);
@@ -167,7 +166,7 @@ void object::test<8>
 ()
 {
     geom1_ = GEOSGeomFromWKT("LINESTRING(0 0,10 0,10 10,0 10,0 0)");
-    geom2_ = GEOSGeomFromWKT("MULTIPOINT(0 0,-1 0)");
+    geom2_ = GEOSGeomFromWKT("MULTIPOINT((0 0),(-1 0))");
     geom3_ = GEOSSnap(geom1_, geom2_, 3);
 
     char* wkt_c = GEOSWKTWriter_write(wktw_, geom3_);
@@ -200,7 +199,7 @@ void object::test<10>
 ()
 {
     geom1_ = GEOSGeomFromWKT("LINESTRING(-71.1317 42.2511,-71.1317 42.2509)");
-    geom2_ = GEOSGeomFromWKT("MULTIPOINT(-71.1261 42.2703,-71.1257 42.2703,-71.1261 42.2702)");
+    geom2_ = GEOSGeomFromWKT("MULTIPOINT((-71.1261 42.2703),(-71.1257 42.2703),(-71.1261 42.2702))");
     geom3_ = GEOSSnap(geom1_, geom2_, 0.5);
 
     char* wkt_c = GEOSWKTWriter_write(wktw_, geom3_);

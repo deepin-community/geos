@@ -19,8 +19,7 @@
 
 #include <geos/geom/GeometryFactory.h>
 #include <geos/io/WKTReader.h>
-#include <geos/geom/CoordinateArraySequence.h>
-#include <geos/geom/FixedSizeCoordinateSequence.h>
+#include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/Point.h>
 #include <geos/geom/LinearRing.h>
@@ -36,6 +35,7 @@
 #include <geos/geomgraph/EdgeEnd.h>
 #include <geos/geomgraph/PlanarGraph.h>
 #include <geos/noding/NodedSegmentString.h>
+#include <geos/noding/snapround/HotPixel.h>
 #include <geos/profiler.h>
 #include <geos/constants.h>
 #include <iostream>
@@ -64,6 +64,7 @@ main()
     check(geomgraph::TopologyLocation);
     check(geomgraph::index::SweepLineEvent);
     check(noding::NodedSegmentString);
+    check(noding::snapround::HotPixel);
     check(geom::Geometry);
     check(geom::Point);
     check(geom::LineString);
@@ -73,9 +74,7 @@ main()
     check(geom::MultiPoint);
     check(geom::MultiLineString);
     check(geom::MultiPolygon);
-    check(geom::CoordinateArraySequence);
-    check(geom::FixedSizeCoordinateSequence<1>);
-    check(geom::FixedSizeCoordinateSequence<2>);
+    check(geom::CoordinateSequence);
     check(triangulate::quadedge::QuadEdge);
     check(triangulate::quadedge::QuadEdgeQuartet);
     check(triangulate::quadedge::Vertex);

@@ -405,5 +405,41 @@ void object::test<13>
     ensure_equals(ret, 0);
 }
 
+// Verify no memory leak on exception (https://github.com/libgeos/geos/issues/505)
+template<>
+template<>
+void object::test<14>
+()
+{
+    geom1_ = GEOSGeomFromWKT("LINESTRING(0 0, 1 NaN)");
+    geom2_ = GEOSGeomFromWKT("POINT(0 0)");
+    prepGeom1_ = GEOSPrepare(geom1_);
+
+    ensure(nullptr != prepGeom1_);
+    ensure(nullptr != geom2_);
+
+    int ret = GEOSPreparedTouches(prepGeom1_, geom2_);
+    ensure_equals(ret, 2);
+}
+
+// Test XY variants
+template<>
+template<>
+void object::test<15>
+()
+{
+    geom1_ = GEOSGeomFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))")    ;
+    prepGeom1_ = GEOSPrepare(geom1_);
+
+    ensure_equals(GEOSPreparedContainsXY(prepGeom1_, 0.5, 0.5), 1);
+    ensure_equals(GEOSPreparedContainsXY(prepGeom1_, 1.5, 0.5), 0);
+    ensure_equals(GEOSPreparedContainsXY(prepGeom1_, 0.75, 0.5), 1);
+
+    ensure_equals(GEOSPreparedIntersectsXY(prepGeom1_, 0.5, 0.5), 1);
+    ensure_equals(GEOSPreparedIntersectsXY(prepGeom1_, 1.5, 0.5), 0);
+    ensure_equals(GEOSPreparedIntersectsXY(prepGeom1_, 0.75, 0.5), 1);
+}
+
+
 } // namespace tut
 

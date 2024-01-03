@@ -27,19 +27,23 @@ struct test_geometry_normalize_data {
     test_geometry_normalize_data()
         : reader(), writer()
     {
-        writer.setTrim(true);
     }
 
     void
     runTest(const char* from, const char* exp)
     {
         GeomPtr g1(reader.read(from));
-        ensure(g1.get() != 0);
+        ensure("g1 is parsed", g1.get() != 0);
         GeomPtr g2(g1->clone());
-        ensure(g2.get() != 0);
+        ensure("g2 is parsed", g2.get() != 0);
         g2->normalize();
 
+
         GeomPtr ge(reader.read(exp));
+
+        ensure_equals(g2->hasZ(), ge->hasZ());
+        ensure_equals(g2->hasM(), ge->hasM());
+
         bool eq = g2->equalsExact(ge.get());
         if(! eq) {
             using namespace std;
@@ -115,13 +119,13 @@ void object::test<4>
 {
     const char* inp =
         "MULTIPOINT ("
-        "0 100," // leftmost
-        "5 6"    // rightmost
+        "(0 100)," // leftmost
+        "(5 6)"    // rightmost
         ")";
     const char* exp =
         "MULTIPOINT ("
-        "5 6,"   // rightmost
-        "0 100"  // leftmost
+        "(5 6),"   // rightmost
+        "(0 100)"  // leftmost
         ")";
     runTest(inp, exp);
 }
@@ -170,8 +174,8 @@ void object::test<7>
     const char* inp =
         "GEOMETRYCOLLECTION("
         "MULTIPOINT ("
-        "0 100," // leftmost
-        "5 6"    // rightmost
+        "(0 100)," // leftmost
+        "(5 6)"    // rightmost
         "),"
         "POINT(10 4)," // more on the right than the multipoint
         "MULTILINESTRING("
@@ -206,12 +210,58 @@ void object::test<7>
         "),"
         "LINESTRING (0 0, 0 100, 100 100, 100 0),"
         "MULTIPOINT ("
-        "5 6,"   // rightmost
-        "0 100"  // leftmost
+        "(5 6),"   // rightmost
+        "(0 100)"  // leftmost
         "),"
         "POINT(10 4)" // more on the right than the multipoint
         ")";
     runTest(inp, exp);
+}
+
+// closed LineString
+template<>
+template<>
+void object::test<8>
+()
+{
+    // This behavior differs from JTS but has existed in GEOS since at
+    // least version 3.8.
+
+    runTest("LINESTRING (8 15, 15 8, 22 15, 15 22, 8 15)",
+            "LINESTRING (8 15, 15 22, 22 15, 15 8, 8 15)");
+}
+
+// zero-length linestring
+template<>
+template<>
+void object::test<9>
+()
+{
+    runTest("LINESTRING (0 1, 0 1)",
+            "LINESTRING (0 1, 0 1)");
+
+    runTest("LINESTRING (0 1, 0 1, 0 1)",
+            "LINESTRING (0 1, 0 1, 0 1)");
+}
+
+// closed LineString M
+template<>
+template<>
+void object::test<10>
+()
+{
+    runTest("LINESTRING M (8 15 0, 15 8 1, 22 15 2, 15 22 3, 8 15 0)",
+            "LINESTRING M (8 15 0, 15 22 3, 22 15 2, 15 8 1, 8 15 0)");
+}
+
+// non-closed LineString M
+template<>
+template<>
+void object::test<11>
+()
+{
+    runTest("LINESTRING M (100 0 0, 100 100 1, 0 100 2, 0 0 3)",
+            "LINESTRING M (0 0 3, 0 100 2, 100 100 1, 100 0 0)");
 }
 
 

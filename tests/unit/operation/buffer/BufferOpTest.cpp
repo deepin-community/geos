@@ -368,7 +368,7 @@ MULTILINESTRING(  \
     // We're basically only interested an rough sense of a
     // meaningful result.
     ensure_equals(gBuffer->getNumPoints(), std::size_t(46));
-    ensure_equals(int(gBuffer->getArea()), 3520);
+    ensure_equals(int(gBuffer->getArea()), 3567);
 }
 
 template<>
@@ -530,6 +530,66 @@ void object::test<19>
     ensure( 1 == GeomPtr(g0->buffer( -10 ))->getNumGeometries() );
     ensure( 1 == GeomPtr(g0->buffer( -15 ))->getNumGeometries() );
     ensure( 1 == GeomPtr(g0->buffer( -18 ))->getNumGeometries() );
+}
+
+// Test for buffer inverted ring check optimization
+// See https://github.com/locationtech/jts/issues/876
+template<>
+template<>
+void object::test<20>
+()
+{
+    using geos::operation::buffer::BufferOp;
+    using geos::operation::buffer::BufferParameters;
+
+    std::string wkt0("LINESTRING (-20 0, 0 20, 20 0, 0 -20, -20 0)");
+    GeomPtr g0(wktreader.read(wkt0));
+
+    GeomPtr result1 = g0->buffer( 70 );
+    ensure( 0 == dynamic_cast<const geos::geom::Polygon*>(result1.get())->getNumInteriorRing() );
+}
+
+// Test for single-sided buffer
+// See https://github.com/libgeos/geos/issues/665
+template<>
+template<>
+void object::test<21>
+()
+{
+    using geos::operation::buffer::BufferOp;
+    using geos::operation::buffer::BufferParameters;
+
+    std::string wkt("LINESTRING (50 50, 150 150, 150 100, 150 0)");
+    GeomPtr geom(wktreader.read(wkt));
+
+    geos::operation::buffer::BufferParameters bp;
+    bp.setSingleSided(true);
+    geos::operation::buffer::BufferOp op(geom.get(), bp);
+
+    std::unique_ptr<Geometry> result = op.getResultGeometry(-21);
+    ensure_equals(int(result->getArea()), 5055);
+}
+
+// Another test for single-sided buffer
+// See https://github.com/libgeos/geos/issues/665
+template<>
+template<>
+void object::test<22>
+()
+{
+    using geos::operation::buffer::BufferOp;
+    using geos::operation::buffer::BufferParameters;
+
+    std::string wkt("MULTILINESTRING((0 0,10 0),(20 0,30 0))");
+    GeomPtr geom(wktreader.read(wkt));
+
+    geos::operation::buffer::BufferParameters bp;
+    bp.setSingleSided(true);
+    geos::operation::buffer::BufferOp op(geom.get(), bp);
+
+    std::unique_ptr<Geometry> result = op.getResultGeometry(-10);
+    ensure_equals(result->getNumGeometries(), 2u);
+    ensure_equals(result->getArea(), 200);
 }
 
 } // namespace tut

@@ -6,7 +6,6 @@
 #include <geos/operation/distance/IndexedFacetDistance.h>
 #include <geos/algorithm/construct/MaximumInscribedCircle.h>
 #include <geos/geom/Coordinate.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/Dimension.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
@@ -60,15 +59,31 @@ struct test_mic_data {
         ensure_equals("y coordinate does not match", lhs.y, rhs.y, tolerance);
     }
 
+    /**
+     * A coarse distance check, mainly testing
+     * that there is not a huge number of iterations.
+     * (This will be revealed by CI taking a very long time!)
+     */
     void
-    checkCircle(const Geometry *geom, double build_tolerance, double x, double y, double expectedRadius)
+    checkCircle(std::string wkt, double tolerance)
     {
-        double tolerance = 2*build_tolerance;
+        std::unique_ptr<Geometry> geom(reader_.read(wkt));
+        MaximumInscribedCircle mic(geom.get(), tolerance);
+        std::unique_ptr<Point> centerPoint = mic.getCenter();
+        std::unique_ptr<Geometry> bdy = geom->getBoundary();
+        double dist = bdy->distance(centerPoint.get());
+        //std::cout << dist << std::endl;
+        ensure(dist < 2 * tolerance);
+    }
+
+    void
+    checkCircle(const Geometry *geom, double tolerance, double x, double y, double expectedRadius)
+    {
         MaximumInscribedCircle mic(geom, tolerance);
         std::unique_ptr<Point> centerPoint = mic.getCenter();
-        const Coordinate* centerPt = centerPoint->getCoordinate();
+        Coordinate centerPt(*centerPoint->getCoordinate());
         Coordinate expectedCenter(x, y);
-        ensure_equals_coordinate(*centerPt, expectedCenter, tolerance);
+        ensure_equals_coordinate(centerPt, expectedCenter, tolerance);
         std::unique_ptr<LineString> radiusLine = mic.getRadiusLine();
         double actualRadius = radiusLine->getLength();
         ensure_equals("radius", actualRadius, expectedRadius, tolerance);
@@ -79,8 +94,8 @@ struct test_mic_data {
         // std::cout << writer_.write(geom) << std::endl;
         // std::cout << writer_.write(radiusLine.get()) << std::endl;
 
-        ensure_equals_coordinate(*centerPt, linePt0, tolerance);
-        const Coordinate radiusPt = *mic.getRadiusPoint()->getCoordinate();
+        ensure_equals_coordinate(centerPt, linePt0, tolerance);
+        Coordinate radiusPt(*mic.getRadiusPoint()->getCoordinate());
         ensure_equals_coordinate(radiusPt, linePt1, tolerance);
     }
 
@@ -173,8 +188,61 @@ void object::test<6>
        0.01, 100, 100, 0 );
 }
 
+// //
+// // Invalid polygon collapsed to a line
+// //
+template<>
+template<>
+void object::test<7>
+()
+{
+     checkCircle("POLYGON((1 2, 1 2, 1 2, 1 2, 3 2, 1 2))",
+       0.01, 2, 2, 0 );
+}
 
+// Exception thrown to avoid infinite loop with infinite envelope
+template<>
+template<>
+void object::test<8>
+()
+{
+    auto g1 = reader_.read("POLYGON ((0 0, 1 0, 1 1, 0 Inf, 0 0))");
+    try {
+        MaximumInscribedCircle mic(g1.get(), 1);
+        mic.getCenter();
+    } catch (const util::GEOSException & e) {}
+
+    auto g2 = reader_.read("POLYGON ((0 0, 1 0, 2 NaN,  0 0))");
+    try {
+        MaximumInscribedCircle mic(g1.get(), 1);
+        mic.getCenter();
+    } catch (const util::GEOSException & e) {}
+}
+
+  /**
+   * Tests that a nearly flat geometry doesn't make the initial cell grid huge.
+   *
+   * See https://github.com/libgeos/geos/issues/875
+   */
+// testNearlyFlat
+template<>
+template<>
+void object::test<9>
+()
+{
+    checkCircle("POLYGON ((59.3 100.00000000000001, 99.7 100.00000000000001, 99.7 100, 59.3 100, 59.3 100.00000000000001))",
+       0.01 );
+}
+
+// testVeryThin
+template<>
+template<>
+void object::test<10>
+()
+{
+    checkCircle("POLYGON ((100 100, 200 300, 300 100, 450 250, 300 99.999999, 200 299.99999, 100 100))",
+       0.01 );
+}
 
 
 } // namespace tut
-

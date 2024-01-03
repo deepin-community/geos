@@ -16,7 +16,6 @@
 #include <geos/algorithm/Orientation.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/Envelope.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/Polygon.h>
@@ -35,7 +34,7 @@ namespace polygon {
 
 
 /* public */
-PolygonEarClipper::PolygonEarClipper(std::vector<Coordinate>& polyShell)
+PolygonEarClipper::PolygonEarClipper(const geom::CoordinateSequence& polyShell)
     : vertex(polyShell)
     , vertexSize(polyShell.size()-1)
     , vertexFirst(0)
@@ -61,10 +60,10 @@ PolygonEarClipper::createNextLinks(std::size_t size) const
 
 /* public static */
 void
-PolygonEarClipper::triangulate(std::vector<Coordinate>& polyShell, TriList& triListResult)
+PolygonEarClipper::triangulate(const geom::CoordinateSequence& polyShell, TriList<Tri>& triListResult)
 {
     PolygonEarClipper clipper(polyShell);
-    return clipper.compute(triListResult);
+    clipper.compute(triListResult);
 }
 
 
@@ -78,7 +77,7 @@ PolygonEarClipper::setSkipFlatCorners(bool p_isFlatCornersSkipped)
 
 /* public */
 void
-PolygonEarClipper::compute(TriList& triList)
+PolygonEarClipper::compute(TriList<Tri>& triList)
 {
     /**
      * Count scanned corners, to catch infinite loops
@@ -100,8 +99,8 @@ PolygonEarClipper::compute(TriList& triList)
         * after enough ears are removed)
         */
         if (! isConvex(corner)) {
-            // remove the corner if it is flat or a repeated point
-            bool isCornerRemoved = hasRepeatedPoint(corner)
+            // remove the corner if it is invalid or flat (if required)
+            bool isCornerRemoved = isCornerInvalid(corner)
                 || (isFlatCornersSkipped && isFlat(corner));
             if (isCornerRemoved) {
                 removeCorner();
@@ -143,7 +142,7 @@ PolygonEarClipper::isValidEar(std::size_t cornerIdx, const std::array<Coordinate
 {
     std::size_t intApexIndex = findIntersectingVertex(cornerIdx, corner);
     //--- no intersections found
-    if (intApexIndex == NO_VERTEX_INDEX)
+    if (intApexIndex == NO_COORD_INDEX)
         return true;
     //--- check for duplicate corner apex vertex
     if ( vertex[intApexIndex].equals2D(corner[1]) ) {
@@ -162,7 +161,7 @@ PolygonEarClipper::findIntersectingVertex(std::size_t cornerIdx, const std::arra
     std::vector<std::size_t> result;
     vertexCoordIndex.query(cornerEnv, result);
 
-    std::size_t dupApexIndex = NO_VERTEX_INDEX;
+    std::size_t dupApexIndex = NO_COORD_INDEX;
     //--- check for duplicate vertices
     for (std::size_t i = 0; i < result.size(); i++) {
         std::size_t vertIndex = result[i];
@@ -192,10 +191,10 @@ PolygonEarClipper::findIntersectingVertex(std::size_t cornerIdx, const std::arra
         else if (geom::Triangle::intersects(corner[0], corner[1], corner[2], v))
             return vertIndex;
     }
-    if (dupApexIndex != NO_VERTEX_INDEX) {
+    if (dupApexIndex != NO_COORD_INDEX) {
         return dupApexIndex;
     }
-    return NO_VERTEX_INDEX;
+    return NO_COORD_INDEX;
 }
 
 
@@ -261,7 +260,7 @@ PolygonEarClipper::removeCorner()
     }
     vertexNext[cornerIndex[0]] = vertexNext[cornerApexIndex];
     vertexCoordIndex.remove(cornerApexIndex);
-    vertexNext[cornerApexIndex] = NO_VERTEX_INDEX;
+    vertexNext[cornerApexIndex] = NO_COORD_INDEX;
     vertexSize--;
     //-- adjust following corner indexes
     cornerIndex[1] = nextIndex(cornerIndex[0]);
@@ -273,7 +272,7 @@ PolygonEarClipper::removeCorner()
 bool
 PolygonEarClipper::isRemoved(std::size_t vertexIndex) const
 {
-    return NO_VERTEX_INDEX == vertexNext[vertexIndex];
+    return NO_COORD_INDEX == vertexNext[vertexIndex];
 }
 
 
@@ -337,9 +336,9 @@ PolygonEarClipper::isFlat(const std::array<Coordinate, 3>& pts) const
 
 /* private static */
 bool
-PolygonEarClipper::hasRepeatedPoint(const std::array<Coordinate, 3>& pts) const
+PolygonEarClipper::isCornerInvalid(const std::array<Coordinate, 3>& pts) const
 {
-    return pts[1].equals2D(pts[0]) || pts[1].equals2D(pts[2]);
+    return pts[1].equals2D(pts[0]) || pts[1].equals2D(pts[2]) || pts[0].equals2D(pts[2]);
 }
 
 
@@ -348,7 +347,7 @@ std::unique_ptr<Polygon>
 PolygonEarClipper::toGeometry() const
 {
     auto gf = geom::GeometryFactory::create();
-    std::unique_ptr<geom::CoordinateArraySequence> cs(new geom::CoordinateArraySequence());
+    std::unique_ptr<geom::CoordinateSequence> cs(new geom::CoordinateSequence());
     std::size_t index = vertexFirst;
     for (std::size_t i = 0; i < vertexSize; i++) {
         const Coordinate& v = vertex[index];

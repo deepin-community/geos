@@ -7,7 +7,6 @@
 #include <geos/geom/Polygon.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/Dimension.h>
 #include <geos/geom/Envelope.h>
 #include <geos/geom/Geometry.h>
@@ -17,10 +16,13 @@
 #include <geos/geom/PrecisionModel.h>
 #include <geos/io/WKTReader.h>
 #include <geos/util/IllegalArgumentException.h>
+#include <geos/util.h>
 // std
 #include <cmath>
 #include <memory>
 #include <string>
+
+using geos::geom::CoordinateSequence;
 
 namespace tut {
 //
@@ -43,18 +45,31 @@ struct test_polygon_data {
     geos::io::WKTReader reader_;
 
     PolygonAutoPtr empty_poly_;
+    PolygonAutoPtr empty_poly_z_;
+    PolygonAutoPtr empty_poly_m_;
+    PolygonAutoPtr empty_poly_zm_;
+
     PolygonAutoPtr poly_;
+    PolygonAutoPtr poly_z_;
+    PolygonAutoPtr poly_m_;
+    PolygonAutoPtr poly_zm_;
     const std::size_t poly_size_;
 
     test_polygon_data()
         : pm_(1)
         , factory_(GeometryFactory::create(&pm_, 0))
         , reader_(factory_.get())
-        , empty_poly_(factory_->createPolygon()), poly_size_(7)
+        , empty_poly_(factory_->createPolygon())
+        , empty_poly_z_(factory_->createPolygon(factory_->createLinearRing(geos::detail::make_unique<CoordinateSequence>(0u, true, false))))
+        , empty_poly_m_(factory_->createPolygon(factory_->createLinearRing(geos::detail::make_unique<CoordinateSequence>(0u, false, true))))
+        , empty_poly_zm_(factory_->createPolygon(factory_->createLinearRing(geos::detail::make_unique<CoordinateSequence>(0u, true, true))))
+        , poly_size_(7)
     {
         // Create non-empty Polygon
-        auto geo = reader_.read("POLYGON((0 10, 5 5, 10 5, 15 10, 10 15, 5 15, 0 10))");
-        poly_.reset(dynamic_cast<PolygonPtr>(geo.release()));
+        poly_ = reader_.read<Polygon>("POLYGON((0 10, 5 5, 10 5, 15 10, 10 15, 5 15, 0 10))");
+        poly_z_ = reader_.read<Polygon>("POLYGON Z ((0 10 1, 5 5 2, 10 5 3, 15 10 4, 10 15 5, 5 15 6, 0 10 1))");
+        poly_m_ = reader_.read<Polygon>("POLYGON M ((0 10 1, 5 5 2, 10 5 3, 15 10 4, 10 15 5, 5 15 6, 0 10 1))");
+        poly_zm_ = reader_.read<Polygon>("POLYGON ZM ((0 10 1 10, 5 5 2 11, 10 5 3 12, 15 10 4 15, 10 15 5 16, 5 15 6 17, 0 10 1 10))");
     }
 
 private:
@@ -82,7 +97,7 @@ void object::test<1>
 
     // Create non-empty Coordinate sequence for Exterior LinearRing
     const std::size_t size = 7;
-    CoordArrayPtr coords = new geos::geom::CoordinateArraySequence();
+    auto coords = geos::detail::make_unique<CoordinateSequence>();
     ensure("sequence is null pointer.", coords != nullptr);
 
     coords->add(Coordinate(0, 10));
@@ -97,19 +112,17 @@ void object::test<1>
 
     try {
         // Create non-empty LinearRing instance
-        geos::geom::LinearRing ring(coords, factory_.get());
+        geos::geom::LinearRing ring(std::move(coords), *factory_);
         ensure(!ring.isEmpty());
         ensure(ring.isClosed());
         ensure(ring.isRing());
         ensure(ring.isSimple());
 
         // Exterior (clone is required here because Polygon takes ownership)
-        geos::geom::Geometry* geo = ring.clone().release();
-        LinearRingPtr exterior = dynamic_cast<LinearRingPtr>(geo);
+        auto exterior = ring.clone();
 
         // Create non-empty Polygon
-        //geos::geom::Polygon poly(exterior, 0, &factory_);
-        PolygonAutoPtr poly(factory_->createPolygon(exterior, nullptr));
+        auto poly= factory_->createPolygon(std::move(exterior));
 
         ensure(!poly->isEmpty());
         ensure(poly->isSimple());
@@ -389,6 +402,20 @@ void object::test<26>
     ensure(coords != nullptr);
     ensure(!coords->isEmpty());
     ensure_equals(coords->getSize(), poly_->getNumPoints());
+    ensure_equals(poly_->hasZ(), coords->hasZ());
+    ensure_equals(poly_->hasM(), coords->hasM());
+
+    auto coords_z = poly_z_->getCoordinates();
+    ensure_equals(poly_z_->hasZ(), coords_z->hasZ());
+    ensure_equals(poly_z_->hasM(), coords_z->hasM());
+
+    auto coords_m = poly_m_->getCoordinates();
+    ensure_equals(poly_m_->hasZ(), coords_m->hasZ());
+    ensure_equals(poly_m_->hasM(), coords_m->hasM());
+
+    auto coords_zm = poly_zm_->getCoordinates();
+    ensure_equals(poly_zm_->hasZ(), coords_zm->hasZ());
+    ensure_equals(poly_zm_->hasM(), coords_zm->hasM());
 }
 
 // Test of clone() and equals() for non-empty Polygon
@@ -460,7 +487,7 @@ void object::test<31>
     ensure(poly_ != nullptr);
     // "POLYGON((0 10, 5 5, 10 5, 15 10, 10 15, 5 15, 0 10))"
 
-    CoordinateCPtr coord = poly_->getCoordinate();
+    const auto* coord = poly_->getCoordinate();
     ensure(coord != nullptr);
     ensure_equals(coord->x, 0);
     ensure_equals(coord->y, 10);
@@ -558,7 +585,7 @@ void object::test<38>
     ensure(!point->isEmpty());
     ensure_equals(point->getGeometryTypeId(), geos::geom::GEOS_POINT);
 
-    CoordinateCPtr pointCoord = point->getCoordinate();
+    const auto* pointCoord = point->getCoordinate();
     ensure(pointCoord != nullptr);
     geos::geom::Coordinate pointCentr(*pointCoord);
 
@@ -650,6 +677,75 @@ void object::test<44>()
 
     auto holes = poly->releaseInteriorRings();
     ensure_equals(holes.size(), 1u);
+}
+
+// Test of hasDimension()
+template<>
+template<>
+void object::test<45>
+()
+{
+    ensure(!poly_->hasDimension(geos::geom::Dimension::P));
+    ensure(!poly_->hasDimension(geos::geom::Dimension::L));
+    ensure(poly_->hasDimension(geos::geom::Dimension::A));
+}
+
+// Test of getCoordinates for empty polygons
+template<>
+template<>
+void object::test<46>
+()
+{
+    ensure(!poly_->getCoordinates()->hasZ());
+    ensure(!poly_->getCoordinates()->hasM());
+
+    ensure(!empty_poly_->getCoordinates()->hasZ());
+    ensure(!empty_poly_->getCoordinates()->hasM());
+
+    ensure(poly_z_->getCoordinates()->hasZ());
+    ensure(!poly_z_->getCoordinates()->hasM());
+
+    ensure(empty_poly_z_->getCoordinates()->hasZ());
+    ensure(!empty_poly_z_->getCoordinates()->hasM());
+
+    ensure(!poly_m_->getCoordinates()->hasZ());
+    ensure(poly_m_->getCoordinates()->hasM());
+
+    ensure(!empty_poly_m_->getCoordinates()->hasZ());
+    ensure(empty_poly_m_->getCoordinates()->hasM());
+
+    ensure(poly_zm_->getCoordinates()->hasZ());
+    ensure(poly_zm_->getCoordinates()->hasM());
+
+    ensure(empty_poly_zm_->getCoordinates()->hasZ());
+    ensure(empty_poly_zm_->getCoordinates()->hasM());
+}
+
+// Test of hasZ, hasM
+template<>
+template<>
+void object::test<47>
+()
+{
+    ensure(!poly_->hasZ());
+    ensure(!poly_->hasM());
+    ensure(!empty_poly_->hasZ());
+    ensure(!empty_poly_->hasM());
+
+    ensure(poly_z_->hasZ());
+    ensure(!poly_z_->hasM());
+    ensure(empty_poly_z_->hasZ());
+    ensure(!empty_poly_z_->hasM());
+
+    ensure(!poly_m_->hasZ());
+    ensure(poly_m_->hasM());
+    ensure(!empty_poly_m_->hasZ());
+    ensure(empty_poly_m_->hasM());
+
+    ensure(poly_zm_->hasZ());
+    ensure(poly_zm_->hasM());
+    ensure(empty_poly_zm_->hasZ());
+    ensure(empty_poly_zm_->hasM());
 }
 
 } // namespace tut

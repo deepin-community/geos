@@ -6,7 +6,7 @@
 // geos
 #include <geos/constants.h> // for std::isnan
 #include <geos/geom/Coordinate.h>
-#include <geos/geom/CoordinateArraySequence.h>
+#include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/Dimension.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/LineString.h>
@@ -15,6 +15,7 @@
 #include <geos/io/WKTReader.h>
 #include <geos/operation/valid/IsValidOp.h>
 #include <geos/operation/valid/TopologyValidationError.h>
+#include <geos/util.h>
 // std
 #include <cmath>
 #include <string>
@@ -79,10 +80,10 @@ template<>
 template<>
 void object::test<1> ()
 {
-    CoordinateArraySequence* cs = new CoordinateArraySequence();
+    auto cs = geos::detail::make_unique<CoordinateSequence>();
     cs->add(Coordinate(0.0, 0.0));
     cs->add(Coordinate(1.0, geos::DoubleNotANumber));
-    GeomPtr line(factory_->createLineString(cs));
+    auto line = factory_->createLineString(std::move(cs));
 
 
     IsValidOp isValidOp(line.get());
@@ -90,12 +91,36 @@ void object::test<1> ()
 
     const TopologyValidationError* err = isValidOp.getValidationError();
     ensure(nullptr != err);
-    const Coordinate& errCoord = err->getCoordinate();
+    const auto& errCoord = err->getCoordinate();
 
     ensure_equals(err->getErrorType(),
                   TopologyValidationError::eInvalidCoordinate);
 
     ensure(0 != std::isnan(errCoord.y));
+    ensure_equals(valid, false);
+}
+
+template<>
+template<>
+void object::test<29> ()
+{
+    auto cs = geos::detail::make_unique<CoordinateSequence>();
+    cs->add(Coordinate(0.0, 0.0));
+    cs->add(Coordinate(1.0, geos::DoubleInfinity));
+    auto line = factory_->createLineString(std::move(cs));
+
+
+    IsValidOp isValidOp(line.get());
+    bool valid = isValidOp.isValid();
+
+    const TopologyValidationError* err = isValidOp.getValidationError();
+    ensure(nullptr != err);
+    const auto& errCoord = err->getCoordinate();
+
+    ensure_equals(err->getErrorType(),
+                  TopologyValidationError::eInvalidCoordinate);
+
+    ensure(!std::isfinite(errCoord.y));
     ensure_equals(valid, false);
 }
 
@@ -111,7 +136,7 @@ void object::test<2> ()
 
     const TopologyValidationError* err = isValidOp.getValidationError();
     ensure(nullptr != err);
-    const Coordinate& errCoord = err->getCoordinate();
+    const auto& errCoord = err->getCoordinate();
 
     ensure_equals(err->getErrorType(),
                   TopologyValidationError::eHoleOutsideShell);

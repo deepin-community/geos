@@ -1,3 +1,162 @@
+geos (3.12.1-1) unstable; urgency=medium
+
+  * Ignore test failures on hurd-i386.
+  * Update symbols for other architectures.
+  * Move from experimental to unstable.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Sun, 12 Nov 2023 19:32:14 +0100
+
+geos (3.12.1-1~exp1) experimental; urgency=medium
+
+  * New upstream release.
+  * Enable Salsa CI.
+  * Ignore test failure on i386.
+    https://github.com/libgeos/geos/issues/947
+  * Switch to dh-sequence-*.
+  * Rename library package for SONAME bump.
+  * Update symbols for amd64.
+  * Update lintian overrides.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Sun, 12 Nov 2023 06:45:28 +0100
+
+geos (3.12.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Update symbols for other architectures.
+  * Strip pre-releases from symbols version.
+  * Move from experimental to unstable.
+  * Use execute_{before,after} instead of override in rules file.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Tue, 27 Jun 2023 20:14:27 +0200
+
+geos (3.12.0~beta2-1~exp1) experimental; urgency=medium
+
+  * New upstream beta release.
+  * Bump debhelper compat to 13.
+  * Drop patches, applied upstream.
+  * Update copyright file.
+  * Update symbols for other architectures.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Wed, 14 Jun 2023 22:09:51 +0200
+
+geos (3.12.0~beta1-1~exp1) experimental; urgency=medium
+
+  * New upstream beta release.
+  * Update copyright file.
+  * Rename library package for SONAME bump.
+  * Temporarily ignore test failures on all architectures.
+  * Update symbols for amd64.
+  * Add patch to fix spelling errors.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Thu, 08 Jun 2023 18:20:53 +0200
+
+geos (3.11.2-1~exp1) experimental; urgency=medium
+
+  * New upstream release.
+  * Add Rules-Requires-Root to control file.
+  * Bump Standards-Version to 4.6.2, no changes.
+  * Update copyright file.
+  * Rename library package for SONAME bump.
+  * Update symbols for amd64.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Fri, 17 Mar 2023 06:28:41 +0100
+
+geos (3.11.1-1) unstable; urgency=medium
+
+  * Update symbols for other architectures.
+  * Move from experimental to unstable.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Wed, 16 Nov 2022 06:12:17 +0100
+
+geos (3.11.1-1~exp1) experimental; urgency=medium
+
+  * New upstream release.
+  * Rename library package for SONAME bump.
+  * Drop doxygen 1.9.4 patch, fixed upstream.
+  * Update copyright file.
+  * Update lintian overrides.
+  * Update symbols for amd64.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Tue, 15 Nov 2022 05:25:47 +0100
+
+geos (3.11.0-2) unstable; urgency=medium
+
+  * Drop obsolete dh_strip override, dbgsym migration complete.
+  * Add patch to fix FTBFS with Doxygen 1.9.4.
+    (closes: #1015862)
+
+ -- Bas Couwenberg <sebastic@debian.org>  Sun, 24 Jul 2022 18:03:03 +0200
+
+geos (3.11.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Update symbols for other architectures.
+  * Move from experimental to unstable.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Fri, 01 Jul 2022 20:30:53 +0200
+
+geos (3.11.0~rc0-1~exp1) experimental; urgency=medium
+
+  * New upstream release candidate.
+  * Bump Standards-Version to 4.6.1, no changes.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Thu, 30 Jun 2022 05:20:59 +0200
+
+geos (3.11.0~beta2-1~exp1) experimental; urgency=medium
+
+  * New upstream beta release.
+  * Revert web directory exclusion, fixed upstream.
+  * Update symbols for other architectures.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Mon, 20 Jun 2022 19:45:02 +0200
+
+geos (3.11.0~beta1-1~exp1) experimental; urgency=medium
+
+  * New upstream beta release.
+  * Rename library package for SONAME bump.
+  * Don't include .inl files in libgeos++-dev, removed upstream.
+  * Update copyright file.
+  * Exclude web directory from upstream tree.
+  * Update docs for renamed NEWS.md.
+  * Update symbols for amd64.
+  * Include geos.h in libgeos++-dev.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Mon, 13 Jun 2022 06:10:50 +0200
+
+geos (3.10.3-1) unstable; urgency=medium
+
+  * Update symbols for other architectures.
+  * Move from experimental to unstable.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Mon, 06 Jun 2022 08:06:45 +0200
+
+geos (3.10.3-1~exp1) experimental; urgency=medium
+
+  * New upstream release.
+  * Update copyright file.
+  * Rename library package for SONAME bump.
+  * Include .inl files in libgeos++-dev.
+  * Update symbols for amd64.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Fri, 03 Jun 2022 18:59:19 +0200
+
+geos (3.10.2-1) unstable; urgency=medium
+
+  * Update symbols for other architectures.
+  * Move from experimental to unstable.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Mon, 17 Jan 2022 15:25:46 +0100
+
+geos (3.10.2-1~exp1) experimental; urgency=medium
+
+  * New upstream release.
+  * Update upstream metadata for GitHub repo.
+  * Rename library package for SONAME bump.
+  * Update symbols for amd64.
+  * Also include .hpp files in libgeos++-dev.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Sun, 16 Jan 2022 07:19:33 +0100
+
 geos (3.10.1-1) unstable; urgency=medium
 
   * Update symbols for other architectures.

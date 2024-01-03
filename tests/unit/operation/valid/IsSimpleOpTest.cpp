@@ -40,7 +40,7 @@ struct test_issimpleop_data {
     double tolerance_;
 
     test_issimpleop_data()
-        : pm_(1)
+        : pm_()
         , factory_(GeometryFactory::create(&pm_, 0))
         , reader_(factory_.get())
         , tolerance_(0.00005)
@@ -63,7 +63,7 @@ struct test_issimpleop_data {
         auto g = reader_.read(wkt);
         IsSimpleOp op(*g, bnRule);
         bool isSimple = op.isSimple();
-        Coordinate nonSimpleLoc = op.getNonSimpleLocation();
+        const auto& nonSimpleLoc = op.getNonSimpleLocation();
         // if geom is not simple, should have a valid location
         ensure("unexpected result", expectedResult == isSimple);
         ensure("not simple implies a non-simple location", isSimple || ! nonSimpleLoc.isNull());
