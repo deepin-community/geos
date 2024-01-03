@@ -70,4 +70,14 @@ void object::test<4>
     ensure_equals(r, 1);
 }
 
+template<>
+template<>
+void object::test<5>
+()
+{
+    geom1_ = GEOSGeomFromWKT("POINT (1 1)");
+    int r = GEOSisClosed(geom1_);
+    ensure_equals(r, 2);
+}
+
 } // namespace tut

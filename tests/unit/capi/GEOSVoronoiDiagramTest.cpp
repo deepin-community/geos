@@ -5,6 +5,7 @@
 // geos
 #include <geos_c.h>
 // std
+#include <cfenv>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -20,7 +21,28 @@ namespace tut {
 // Common data used in test cases.
 struct test_capigeosvoronoidiagram_data : public capitest::utility {
     test_capigeosvoronoidiagram_data() {
-        GEOSWKTWriter_setTrim(wktw_, 1);
+    }
+
+
+    void check_voronoi_ordered(const char* wkt)
+    {
+        GEOSGeometry* input = GEOSGeomFromWKT(wkt);
+        GEOSGeometry* result = GEOSVoronoiDiagram(input, nullptr, 0, GEOS_VORONOI_PRESERVE_ORDER);
+
+        ensure_equals(GEOSGetNumGeometries(result), GEOSGetNumCoordinates(input));
+
+        const GEOSCoordSequence* seq = GEOSGeom_getCoordSeq(input);
+        double x, y;
+        for (int i = 0; i < GEOSGetNumGeometries(result); i++) {
+        GEOSCoordSeq_getXY(seq, (unsigned int) i, &x, &y);
+        GEOSGeometry* pt = GEOSGeom_createPointFromXY(x, y);
+        const GEOSGeometry* cell = GEOSGetGeometryN(result, i);
+        ensure(GEOSContains(cell, pt));
+        GEOSGeom_destroy(pt);
+        }
+
+        GEOSGeom_destroy(result);
+        GEOSGeom_destroy(input);
     }
 };
 
@@ -39,6 +61,8 @@ template<>
 void object::test<1>
 ()
 {
+    std::feclearexcept(FE_ALL_EXCEPT);
+
     geom1_ = GEOSGeomFromWKT("POINT(10 20)");
 
     geom2_ = GEOSVoronoiDiagram(geom1_, nullptr, 0, 0);
@@ -48,6 +72,8 @@ void object::test<1>
     GEOSGeom_destroy(geom2_);
     geom2_ = GEOSVoronoiDiagram(geom1_, nullptr, 0, 1);
     ensure_geometry_equals(geom2_, "MULTILINESTRING EMPTY");
+
+    ensure("FE_INVALID raised", !std::fetestexcept(FE_INVALID));
 }
 
 //More points:
@@ -139,5 +165,14 @@ void object::test<7>
     geom2_ = GEOSVoronoiDiagram(geom1_, nullptr, 0, 1);
 }
 
-} // namespace tut
+// Ordered output
+template<>
+template<>
+void object::test<8>
+()
+{
+    check_voronoi_ordered("LINESTRING (1 1, 3 3, 2 2)");
+    check_voronoi_ordered("LINESTRING (1 1, 2 2, 3 3)");
+}
 
+} // namespace tut

@@ -11,9 +11,8 @@
 
 add_executable(geosop
   GeosOp.cpp
-  GeomFunction.cpp
-  WKBStreamReader.cpp
-  WKTStreamReader.cpp )
+  GeometryOp.cpp
+  )
 
 target_link_libraries(geosop PRIVATE geos geos_c)
 

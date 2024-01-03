@@ -138,7 +138,7 @@ template<>
 void object::test<3>
 ()
 {
-    runTest("LINESTRING (0 0, 2 0)", "MULTIPOINT (0 1, 1 0, 2 1)", 1.0);
+    runTest("LINESTRING (0 0, 2 0)", "MULTIPOINT ((0 1), (1 0), (2 1))", 1.0);
 }
 
 // 4 - testLinesShowingDiscretenessEffect
@@ -163,6 +163,21 @@ void object::test<5>
 ()
 {
     runTest("LINESTRING (1 1, 2 2)", "LINESTRING (1 4, 2 3)", 3);
+}
+
+template<>
+template<>
+void object::test<6>
+()
+{
+    auto g1 = reader.read("LINESTRING EMPTY");
+    auto g2 = reader.read("POLYGON EMPTY");
+
+    try {
+        DiscreteFrechetDistance::distance(*g1, *g2);
+    } catch (const geos::util::GEOSException& e) {
+
+    }
 }
 
 } // namespace tut

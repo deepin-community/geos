@@ -35,7 +35,6 @@
 #include <geos/geom/prep/PreparedGeometry.h>
 #include <geos/geom/prep/PreparedGeometryFactory.h>
 #include <geos/geom/util/Densifier.h>
-#include <geos/operation/overlay/OverlayOp.h>
 #include <geos/operation/overlay/snap/GeometrySnapper.h>
 #include <geos/operation/overlayng/OverlayNG.h>
 #include <geos/operation/overlayng/OverlayNGRobust.h>
@@ -309,7 +308,7 @@ XMLTester::XMLTester()
     testValidOutput(false),
     testValidInput(false),
     sqlOutput(false),
-    HEXWKB_output(true)
+    HEXWKB_output(false)
 {
     setVerbosityLevel(0);
 }
@@ -704,6 +703,8 @@ XMLTester::parseCase(const tinyxml2::XMLNode* node)
         std::cout << *curr_file << ":";
         std::cout << " case" << caseCount << ":";
         std::cout << " skipped (" << thrownException << ")." << std::endl;
+        if (gA) delete gA;
+        if (gB) delete gB;
         return;
     }
 
@@ -1866,12 +1867,7 @@ XMLTester::parseTest(const tinyxml2::XMLNode* node)
 
 
             auto polys = plgnzr.getPolygons();
-            std::vector<geom::Geometry*>* newgeoms = new std::vector<geom::Geometry*>;
-            for(unsigned int i = 0; i < polys.size(); i++) {
-                newgeoms->push_back(polys[i].release());
-            }
-
-            GeomPtr gRealRes(factory->createGeometryCollection(newgeoms));
+            GeomPtr gRealRes(factory->createGeometryCollection(std::move(polys)));
             gRealRes->normalize();
 
 

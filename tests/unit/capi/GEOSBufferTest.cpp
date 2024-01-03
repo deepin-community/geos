@@ -25,7 +25,6 @@ struct test_capigeosbuffer_data : public capitest::utility {
     test_capigeosbuffer_data()
         : bp_(nullptr)
     {
-        GEOSWKTWriter_setTrim(wktw_, 1);
     }
 
     ~test_capigeosbuffer_data()
@@ -166,8 +165,13 @@ void object::test<6>
 
     ensure(nullptr != geom1_);
 
-    geom2_ = GEOSBufferWithStyle(geom1_, 5, 20, GEOSBUF_CAP_SQUARE,
-                                 GEOSBUF_JOIN_ROUND, 5.0);
+    GEOSBufferParams* params = GEOSBufferParams_create();
+    ensure_equals(GEOSBufferParams_setQuadrantSegments(params, 20), 1);
+    ensure_equals(GEOSBufferParams_setEndCapStyle(params, GEOSBUF_CAP_SQUARE), 1);
+    ensure_equals(GEOSBufferParams_setJoinStyle(params, GEOSBUF_JOIN_ROUND), 1);
+    ensure_equals(GEOSBufferParams_setMitreLimit(params, 5.0), 1);
+
+    geom2_ = GEOSBufferWithParams(geom1_, params, 5);
 
     ensure(nullptr != geom2_);
 
@@ -178,6 +182,7 @@ void object::test<6>
     ensure(0 != GEOSArea(geom2_, &area_));
     ensure_area(area_, 211.803, 0.001);
 
+    GEOSBufferParams_destroy(params);
 }
 
 // Buffer with flat end caps on a 2-vertices line (no matter quadSegs)
@@ -374,21 +379,17 @@ void object::test<14>
 ()
 {
     geom1_ = GEOSGeomFromWKT("POLYGON((0 0, 10 0, 10 10, 0 0))");
-
     ensure(nullptr != geom1_);
 
     geom2_ = GEOSBufferWithStyle(geom1_, 2, 200, GEOSBUF_CAP_FLAT,
                                  GEOSBUF_JOIN_MITRE, 1);
-
     ensure(nullptr != geom2_);
 
     wkt_ = GEOSGeomToWKT(geom2_);
 
     ensure_equals(GEOSGetNumCoordinates(geom2_), 7);
-
     ensure(0 != GEOSArea(geom2_, &area_));
-    ensure_area(area_, 127.452, 0.001);
-
+    ensure_area(area_, 132.289, 0.001);
 }
 
 // Buffer with limited mitre  (2)
@@ -411,7 +412,7 @@ void object::test<15>
     ensure_equals(GEOSGetNumCoordinates(geom2_), 6);
 
     ensure(0 != GEOSArea(geom2_, &area_));
-    ensure_area(area_, 139.043, 0.001);
+    ensure_area(area_, 140.352, 0.001);
 
 }
 
@@ -525,7 +526,7 @@ template<>
 void object::test<20>
 ()
 {
-    geom1_ = GEOSGeomFromWKT("LINESTRING(0 0, 10 0, 10 10)', -10)");
+    geom1_ = GEOSGeomFromWKT("LINESTRING(0 0, 10 0, 10 10)");
 
     ensure(nullptr != geom1_);
 
@@ -541,5 +542,77 @@ void object::test<20>
 
 }
 
-} // namespace tut
+/*
+// Invalid result polygon with full precision, fall back on lower precision
+// https://trac.osgeo.org/geos/ticket/1131
+template<>
+template<>
+void object::test<21>
+()
+{
+    geom1_ = GEOSGeomFromWKT("POLYGON((-6503873.862740669 -3656747.43316935, -6481859.9985945 -3656747.43316935, -6481859.9985945 -3688545.2369360398, -6506319.8476458 -3688545.2369360398, -6506319.8476458 -3664085.38788474, -6501427.87783554 -3664085.38788474, -6501427.87783554 -3661639.40297961, -6498981.89293041 -3661639.40297961, -6498981.89293041 -3659193.41807448, -6503873.862740669 -3659193.41807448, -6503873.862740669 -3656747.43316935))");
+    ensure(nullptr != geom1_);
 
+    bp_ = GEOSBufferParams_create();
+    GEOSBufferParams_setQuadrantSegments(bp_, 1);
+    geom2_ = GEOSBufferWithParams(geom1_, bp_, 2445.98490513);
+
+    wkt_ = GEOSGeomToWKT(geom2_);
+    std::cout << wkt_ << "\n";
+
+    ensure(nullptr != geom2_);
+    ensure("Buffer result polygon is not valid", GEOSisValid(geom2_));
+}
+*/
+
+// https://trac.osgeo.org/geos/ticket/590
+template<>
+template<>
+void object::test<22>
+()
+{
+    geom1_ = GEOSGeomFromWKT("LINEARRING(38.7066196617741550 -28.8266827415760860, -48.9228243285119790 100.6496977731573000, 54.4799195800256510 129.8110447359351000, 108.8101748540030500 45.8263654831350490, 86.7372079193139310 22.3209346883718070, 71.8793256882949690 36.0080540867567290, 55.2741306329362700 34.2630391674088840, 52.0696193064635370 19.4304123529519610, 62.0890652576763390 -3.9267923737325212, 38.7066196617741550 -28.8266827415760860)");
+
+    ensure(nullptr != geom1_);
+
+    geom2_ = GEOSBufferWithStyle(geom1_, 22.532378519833863, 6, GEOSBUF_CAP_FLAT, GEOSBUF_JOIN_MITRE, 5);
+
+    ensure(nullptr != geom2_);
+
+    ensure(GEOSisValid(geom2_));
+}
+
+// Error raised on invalid value of buffer params
+template<>
+template<>
+void object::test<23>
+()
+{
+    GEOSBufferParams* params = GEOSBufferParams_create();
+
+    ensure_equals(GEOSBufferParams_setEndCapStyle(params, 500), 0);
+    ensure_equals(GEOSBufferParams_setJoinStyle(params, 500), 0);
+
+    GEOSBufferParams_destroy(params);
+}
+
+// Segfault with Inf coords
+// https://github.com/libgeos/geos/issues/822
+template<>
+template<>
+void object::test<24>
+()
+{
+    std::string wkb("0106000020E61000000100000001030000000100000005000000000000000000F07F000000000000F07F000000000000F07F000000000000F07F000000000000F07F000000000000F07F000000000000F07F000000000000F07F000000000000F07F000000000000F07F");
+    geom1_ = GEOSGeomFromHEX_buf(reinterpret_cast<const unsigned char*>(wkb.c_str()), wkb.size());
+
+    result_ = GEOSBuffer(geom1_, 20, 8);
+
+    ensure(result_ == nullptr);
+
+    result_ = GEOSBuffer(geom1_, -20, 8);
+
+    ensure(result_ == nullptr);
+}
+
+} // namespace tut

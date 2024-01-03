@@ -23,7 +23,6 @@
 #include <geos/geom/MultiLineString.h>
 #include <geos/geom/MultiPolygon.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/PrecisionModel.h>
 
 #include <algorithm>
@@ -180,6 +179,10 @@ void GeoJSONWriter::encodeGeometry(const geom::Geometry* geometry, geos_nlohmann
         auto line = static_cast<const geom::LineString*>(geometry);
         encodeLineString(line, j);
     }
+    else if (type == GEOS_LINEARRING) {
+        auto line = static_cast<const geom::LineString*>(geometry);
+        encodeLineString(line, j);
+    }
     else if (type == GEOS_POLYGON) {
         auto poly = static_cast<const geom::Polygon*>(geometry);
         encodePolygon(poly, j);
@@ -205,7 +208,12 @@ void GeoJSONWriter::encodeGeometry(const geom::Geometry* geometry, geos_nlohmann
 void GeoJSONWriter::encodePoint(const geom::Point* point, geos_nlohmann::ordered_json& j)
 {
     j["type"] = "Point";
-    j["coordinates"] = convertCoordinate(point->getCoordinate());
+    if (!point->isEmpty()) {
+        j["coordinates"] = convertCoordinate(point->getCoordinate());
+    }
+    else {
+        j["coordinates"] = j.array();
+    }
 }
 
 void GeoJSONWriter::encodeLineString(const geom::LineString* line, geos_nlohmann::ordered_json& j)
@@ -275,7 +283,7 @@ void GeoJSONWriter::encodeGeometryCollection(const geom::GeometryCollection* g, 
     j["geometries"] = geometryArray;
 }
 
-std::pair<double, double> GeoJSONWriter::convertCoordinate(const Coordinate* c)
+std::pair<double, double> GeoJSONWriter::convertCoordinate(const CoordinateXY* c)
 {
     return std::make_pair(c->x, c->y);
 }

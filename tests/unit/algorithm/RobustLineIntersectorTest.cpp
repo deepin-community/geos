@@ -15,7 +15,7 @@
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/Point.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateArraySequence.h>
+#include <geos/util.h>
 // std
 #include <sstream>
 #include <string>
@@ -60,10 +60,10 @@ template<>
 void object::test<1>
 ()
 {
-    Coordinate p1(10, 10);
-    Coordinate p2(20, 20);
-    Coordinate q1(20, 10);
-    Coordinate q2(10, 20);
+    CoordinateXY p1(10, 10);
+    CoordinateXY p2(20, 20);
+    CoordinateXY q1(20, 10);
+    CoordinateXY q2(10, 20);
     Coordinate x(15, 15);
     i.computeIntersection(p1, p2, q1, q2);
 
@@ -248,17 +248,16 @@ void object::test<13>
     using geos::geom::LineString;
 
     GeometryFactory::Ptr factory = GeometryFactory::create();
-    CoordinateArraySequence* cs = new CoordinateArraySequence();
+    auto cs = geos::detail::make_unique<CoordinateSequence>();
     cs->add(p1);
     cs->add(p2);
 
-    GeomPtr l(factory->createLineString(cs));
-    GeomPtr p(factory->createPoint(q));
-    ensure(!l->intersects(p.get()));
-
-    ensure(!PointLocation::isOnLine(q, cs));
+    ensure(!PointLocation::isOnLine(q, cs.get()));
     ensure_equals(Orientation::index(p1, p2, q), -1);
 
+    auto l = factory->createLineString(std::move(cs));
+    GeomPtr p(factory->createPoint(q));
+    ensure(!l->intersects(p.get()));
 }
 
 // Test intersects: point on segment with FLOAT PM

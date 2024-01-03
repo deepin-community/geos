@@ -14,19 +14,21 @@ Note some executables have different names.
 
 ## Unit tests
 
-    geos_unit [class] [test number]
+    bin/test_geos_unit [name] [test number]
+    
+The test name is the **tut group name** found in the unit test file on a line begining `group` (e.g. like [this](https://github.com/libgeos/geos/blob/main/tests/unit/operation/buffer/BufferOpTest.cpp#L55).
 
-Run all unit tests
+### Run all unit tests
 
-    geos_unit
+    bin/test_geos_unit
 
-Run single unit test class
+### Run single unit test class
 
-    geos_unit capi::GEOSNode
+    bin/test_geos_unit capi::GEOSNode
 
-Run single test within unit test class
+### Run single test within unit test class
 
-    geos_unit capi::GEOSNode 1
+    bin/test_geos_unit capi::GEOSNode 1
 
 ## XML Tests
 

@@ -25,7 +25,6 @@ struct test_capimaximuminscribedcircle_data : public capitest::utility {
     test_capimaximuminscribedcircle_data()
         : wkt_(nullptr)
     {
-        GEOSWKTWriter_setTrim(wktw_, 1);
         GEOSWKTWriter_setRoundingPrecision(wktw_, 8);
     }
 
@@ -76,6 +75,23 @@ void object::test<2>
 
     ensure_equals(std::string(wkt_), std::string("LINESTRING (150 150, 100 100)"));
 }
+
+
+// Crash with Inf coords
+// https://github.com/libgeos/geos/issues/821
+template<>
+template<>
+void object::test<3>
+()
+{
+    std::string wkb("0106000020E61000000100000001030000000100000005000000000000000000F07F000000000000F07F000000000000F07F000000000000F07F000000000000F07F000000000000F07F000000000000F07F000000000000F07F000000000000F07F000000000000F07F");
+    geom1_ = GEOSGeomFromHEX_buf(reinterpret_cast<const unsigned char*>(wkb.c_str()), wkb.size());
+
+    result_ = GEOSMaximumInscribedCircle(geom1_, 1);
+
+    // no crash
+}
+
 
 
 } // namespace tut

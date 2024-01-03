@@ -12,12 +12,12 @@
 #include <geos/geom/Point.h>
 #include <geos/io/WKTReader.h>
 #include <geos/io/WKTWriter.h>
+#include <geos/util/TopologyException.h>
 // std
 #include <memory>
 #include <string>
 #include <vector>
 #include <iostream>
-#include <geos/geom/GeometryFactory.inl>
 
 namespace tut {
 //

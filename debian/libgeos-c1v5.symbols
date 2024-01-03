@@ -1,4 +1,4 @@
-# SymbolsHelper-Confirmed: 3.10.1 amd64 armel armhf hurd-i386 i386 mipsel powerpc
+# SymbolsHelper-Confirmed: 3.12.1 amd64 arm64 ia64 ppc64 ppc64el riscv64 s390x
 libgeos_c.so.1 #PACKAGE# #MINVER#
 * Build-Depends-Package: libgeos-dev
  GEOSArea@Base 3.4.2
@@ -29,6 +29,12 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSBuildArea_r@Base 3.8.0
  GEOSClipByRect@Base 3.5.0
  GEOSClipByRect_r@Base 3.5.0
+ GEOSConcaveHull@Base 3.11.0
+ GEOSConcaveHullByLength@Base 3.12.0
+ GEOSConcaveHullByLength_r@Base 3.12.0
+ GEOSConcaveHullOfPolygons@Base 3.11.0
+ GEOSConcaveHullOfPolygons_r@Base 3.11.0
+ GEOSConcaveHull_r@Base 3.11.0
  GEOSConstrainedDelaunayTriangulation@Base 3.10.0
  GEOSConstrainedDelaunayTriangulation_r@Base 3.10.0
  GEOSContains@Base 3.4.2
@@ -83,6 +89,10 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSCoordSeq_setY_r@Base 3.4.2
  GEOSCoordSeq_setZ@Base 3.4.2
  GEOSCoordSeq_setZ_r@Base 3.4.2
+ GEOSCoverageIsValid@Base 3.12.0
+ GEOSCoverageIsValid_r@Base 3.12.0
+ GEOSCoverageSimplifyVW@Base 3.12.0
+ GEOSCoverageSimplifyVW_r@Base 3.12.0
  GEOSCoverageUnion@Base 3.8.0
  GEOSCoverageUnion_r@Base 3.8.0
  GEOSCoveredBy@Base 3.4.2
@@ -100,6 +110,8 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSDifferencePrec_r@Base 3.9.0
  GEOSDifference_r@Base 3.4.2
  GEOSDisjoint@Base 3.4.2
+ GEOSDisjointSubsetUnion@Base 3.12.0
+ GEOSDisjointSubsetUnion_r@Base 3.12.0
  GEOSDisjoint_r@Base 3.4.2
  GEOSDistance@Base 3.4.2
  GEOSDistanceIndexed@Base 3.7.0
@@ -112,6 +124,8 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSEquals@Base 3.4.2
  GEOSEqualsExact@Base 3.4.2
  GEOSEqualsExact_r@Base 3.4.2
+ GEOSEqualsIdentical@Base 3.12.0
+ GEOSEqualsIdentical_r@Base 3.12.0
  GEOSEquals_r@Base 3.4.2
  GEOSFrechetDistance@Base 3.7.0
  GEOSFrechetDistanceDensify@Base 3.7.0
@@ -141,6 +155,8 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSGeomGetEndPoint_r@Base 3.4.2
  GEOSGeomGetLength@Base 3.4.2
  GEOSGeomGetLength_r@Base 3.4.2
+ GEOSGeomGetM@Base 3.12.0
+ GEOSGeomGetM_r@Base 3.12.0
  GEOSGeomGetNumPoints@Base 3.4.2
  GEOSGeomGetNumPoints_r@Base 3.4.2
  GEOSGeomGetPointN@Base 3.4.2
@@ -185,6 +201,8 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSGeom_createPoint_r@Base 3.4.2
  GEOSGeom_createPolygon@Base 3.4.2
  GEOSGeom_createPolygon_r@Base 3.4.2
+ GEOSGeom_createRectangle@Base 3.11.0
+ GEOSGeom_createRectangle_r@Base 3.11.0
  GEOSGeom_destroy@Base 3.4.2
  GEOSGeom_destroy_r@Base 3.4.2
  GEOSGeom_extractUniquePoints@Base 3.4.2
@@ -195,6 +213,8 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSGeom_getCoordinateDimension_r@Base 3.4.2
  GEOSGeom_getDimensions@Base 3.4.2
  GEOSGeom_getDimensions_r@Base 3.4.2
+ GEOSGeom_getExtent@Base 3.11.0
+ GEOSGeom_getExtent_r@Base 3.11.0
  GEOSGeom_getPrecision@Base 3.6.0
  GEOSGeom_getPrecision_r@Base 3.6.0
  GEOSGeom_getUserData@Base 3.6.0
@@ -207,10 +227,14 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSGeom_getYMax_r@Base 3.7.0
  GEOSGeom_getYMin@Base 3.7.0
  GEOSGeom_getYMin_r@Base 3.7.0
+ GEOSGeom_releaseCollection@Base 3.12.0
+ GEOSGeom_releaseCollection_r@Base 3.12.0
  GEOSGeom_setPrecision@Base 3.6.0
  GEOSGeom_setPrecision_r@Base 3.6.0
  GEOSGeom_setUserData@Base 3.6.0
  GEOSGeom_setUserData_r@Base 3.6.0
+ GEOSGeom_transformXY@Base 3.11.0
+ GEOSGeom_transformXY_r@Base 3.11.0
  GEOSGetCentroid@Base 3.4.2
  GEOSGetCentroid_r@Base 3.4.2
  GEOSGetExteriorRing@Base 3.4.2
@@ -227,12 +251,16 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSGetNumInteriorRings_r@Base 3.4.2
  GEOSGetSRID@Base 3.4.2
  GEOSGetSRID_r@Base 3.4.2
+ GEOSHasM@Base 3.12.0
+ GEOSHasM_r@Base 3.12.0
  GEOSHasZ@Base 3.4.2
  GEOSHasZ_r@Base 3.4.2
  GEOSHausdorffDistance@Base 3.4.2
  GEOSHausdorffDistanceDensify@Base 3.4.2
  GEOSHausdorffDistanceDensify_r@Base 3.4.2
  GEOSHausdorffDistance_r@Base 3.4.2
+ GEOSHilbertCode@Base 3.11.0
+ GEOSHilbertCode_r@Base 3.11.0
  GEOSInterpolate@Base 3.4.2
  GEOSInterpolateNormalized@Base 3.4.2
  GEOSInterpolateNormalized_r@Base 3.4.2
@@ -248,7 +276,11 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSLength@Base 3.4.2
  GEOSLength_r@Base 3.4.2
  GEOSLineMerge@Base 3.4.2
+ GEOSLineMergeDirected@Base 3.11.0
+ GEOSLineMergeDirected_r@Base 3.11.0
  GEOSLineMerge_r@Base 3.4.2
+ GEOSLineSubstring@Base 3.12.0
+ GEOSLineSubstring_r@Base 3.12.0
  GEOSMakeValid@Base 3.8.0
  GEOSMakeValidParams_create@Base 3.10.0
  GEOSMakeValidParams_create_r@Base 3.10.0
@@ -281,12 +313,18 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSNormalize_r@Base 3.4.2
  GEOSOffsetCurve@Base 3.4.2
  GEOSOffsetCurve_r@Base 3.4.2
+ GEOSOrientPolygons@Base 3.12.0
+ GEOSOrientPolygons_r@Base 3.12.0
  GEOSOrientationIndex@Base 3.4.2
  GEOSOrientationIndex_r@Base 3.4.2
  GEOSOverlaps@Base 3.4.2
  GEOSOverlaps_r@Base 3.4.2
  GEOSPointOnSurface@Base 3.4.2
  GEOSPointOnSurface_r@Base 3.4.2
+ GEOSPolygonHullSimplify@Base 3.11.0
+ GEOSPolygonHullSimplifyMode@Base 3.11.0
+ GEOSPolygonHullSimplifyMode_r@Base 3.11.0
+ GEOSPolygonHullSimplify_r@Base 3.11.0
  GEOSPolygonize@Base 3.4.2
  GEOSPolygonize_full@Base 3.4.2
  GEOSPolygonize_full_r@Base 3.4.2
@@ -300,6 +338,8 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSPreparedContains@Base 3.4.2
  GEOSPreparedContainsProperly@Base 3.4.2
  GEOSPreparedContainsProperly_r@Base 3.4.2
+ GEOSPreparedContainsXY@Base 3.12.0
+ GEOSPreparedContainsXY_r@Base 3.12.0
  GEOSPreparedContains_r@Base 3.4.2
  GEOSPreparedCoveredBy@Base 3.4.2
  GEOSPreparedCoveredBy_r@Base 3.4.2
@@ -316,6 +356,8 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSPreparedGeom_destroy@Base 3.4.2
  GEOSPreparedGeom_destroy_r@Base 3.4.2
  GEOSPreparedIntersects@Base 3.4.2
+ GEOSPreparedIntersectsXY@Base 3.12.0
+ GEOSPreparedIntersectsXY_r@Base 3.12.0
  GEOSPreparedIntersects_r@Base 3.4.2
  GEOSPreparedNearestPoints@Base 3.9.0
  GEOSPreparedNearestPoints_r@Base 3.9.0
@@ -337,8 +379,12 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSRelatePatternMatch_r@Base 3.4.2
  GEOSRelatePattern_r@Base 3.4.2
  GEOSRelate_r@Base 3.4.2
+ GEOSRemoveRepeatedPoints@Base 3.11.0
+ GEOSRemoveRepeatedPoints_r@Base 3.11.0
  GEOSReverse@Base 3.7.0
  GEOSReverse_r@Base 3.7.0
+ GEOSSTRtree_build@Base 3.12.0
+ GEOSSTRtree_build_r@Base 3.12.0
  GEOSSTRtree_create@Base 3.4.2
  GEOSSTRtree_create_r@Base 3.4.2
  GEOSSTRtree_destroy@Base 3.4.2
@@ -395,6 +441,8 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSWKBReader_readHEX@Base 3.4.2
  GEOSWKBReader_readHEX_r@Base 3.4.2
  GEOSWKBReader_read_r@Base 3.4.2
+ GEOSWKBReader_setFixStructure@Base 3.11.0
+ GEOSWKBReader_setFixStructure_r@Base 3.11.0
  GEOSWKBWriter_create@Base 3.4.2
  GEOSWKBWriter_create_r@Base 3.4.2
  GEOSWKBWriter_destroy@Base 3.4.2
@@ -425,6 +473,8 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  GEOSWKTReader_destroy_r@Base 3.4.2
  GEOSWKTReader_read@Base 3.4.2
  GEOSWKTReader_read_r@Base 3.4.2
+ GEOSWKTReader_setFixStructure@Base 3.11.0
+ GEOSWKTReader_setFixStructure_r@Base 3.11.0
  GEOSWKTWriter_create@Base 3.4.2
  GEOSWKTWriter_create_r@Base 3.4.2
  GEOSWKTWriter_destroy@Base 3.4.2
@@ -478,6 +528,10 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  _ZN16CAPI_ItemVisitorD2Ev@Base 3.4.2
  _ZN20GEOSContextHandle_HS13ERROR_MESSAGEEPKcz@Base 3.9.0
  _ZN20GEOSContextHandle_HS14NOTICE_MESSAGEEPKcz@Base 3.9.0
+ _ZN4geos11triangulate21VoronoiDiagramBuilderD1Ev@Base 3.12.0
+ _ZN4geos11triangulate21VoronoiDiagramBuilderD2Ev@Base 3.12.0
+ _ZN4geos11triangulate28DelaunayTriangulationBuilderD1Ev@Base 3.12.0
+ _ZN4geos11triangulate28DelaunayTriangulationBuilderD2Ev@Base 3.12.0
  _ZN4geos11triangulate8quadedge19QuadEdgeSubdivisionD0Ev@Base 3.9.0
  _ZN4geos11triangulate8quadedge19QuadEdgeSubdivisionD1Ev@Base 3.9.0
  _ZN4geos11triangulate8quadedge19QuadEdgeSubdivisionD2Ev@Base 3.9.0
@@ -490,20 +544,17 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  _ZN4geos4geom15MultiLineStringD0Ev@Base 3.9.0
  _ZN4geos4geom15MultiLineStringD1Ev@Base 3.9.0
  _ZN4geos4geom15MultiLineStringD2Ev@Base 3.9.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EE11setOrdinateE{size_t}{size_t}d@Base 3.8.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EE5setAtERKNS0_10CoordinateE{size_t}@Base 3.8.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EE8apply_rwEPKNS0_16CoordinateFilterE@Base 3.8.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EE9setPointsERKSt6vectorINS0_10CoordinateESaIS4_EE@Base 3.8.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EED0Ev@Base 3.8.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EED1Ev@Base 3.8.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EED2Ev@Base 3.8.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EE11setOrdinateE{size_t}{size_t}d@Base 3.8.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EE5setAtERKNS0_10CoordinateE{size_t}@Base 3.8.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EE8apply_rwEPKNS0_16CoordinateFilterE@Base 3.8.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EE9setPointsERKSt6vectorINS0_10CoordinateESaIS4_EE@Base 3.8.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EED0Ev@Base 3.8.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EED1Ev@Base 3.8.0
- (optional=templinst|subst)_ZN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EED2Ev@Base 3.8.0
+ _ZN4geos4geom16CoordinateFilter9filter_roEPKNS0_10CoordinateE@Base 3.11.0
+ _ZN4geos4geom16CoordinateFilter9filter_roEPKNS0_12CoordinateXYE@Base 3.12.0
+ _ZN4geos4geom16CoordinateFilter9filter_roEPKNS0_13CoordinateXYME@Base 3.12.0
+ _ZN4geos4geom16CoordinateFilter9filter_roEPKNS0_14CoordinateXYZME@Base 3.12.0
+ (optional=templinst)_ZN4geos4geom19CoordinateInspectorINS_4util27UniqueCoordinateArrayFilterEE9filter_roEPKNS0_10CoordinateE@Base 3.12.0
+ (optional=templinst)_ZN4geos4geom19CoordinateInspectorINS_4util27UniqueCoordinateArrayFilterEE9filter_roEPKNS0_12CoordinateXYE@Base 3.12.0
+ (optional=templinst)_ZN4geos4geom19CoordinateInspectorINS_4util27UniqueCoordinateArrayFilterEE9filter_roEPKNS0_13CoordinateXYME@Base 3.12.0
+ (optional=templinst)_ZN4geos4geom19CoordinateInspectorINS_4util27UniqueCoordinateArrayFilterEE9filter_roEPKNS0_14CoordinateXYZME@Base 3.12.0
+ _ZN4geos4geom23GeometryComponentFilter6isDoneEv@Base 3.12.0
+ _ZN4geos4geom5Point21geometryChangedActionEv@Base 3.12.0
+ _ZN4geos4geom5Point5setXYEdd@Base 3.12.0
  _ZN4geos4geom5PointD0Ev@Base 3.8.0
  _ZN4geos4geom5PointD1Ev@Base 3.8.0
  _ZN4geos4geom5PointD2Ev@Base 3.8.0
@@ -524,7 +575,6 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  _ZN4geos4util24IllegalArgumentExceptionD0Ev@Base 3.4.2
  _ZN4geos4util24IllegalArgumentExceptionD1Ev@Base 3.4.2
  _ZN4geos4util24IllegalArgumentExceptionD2Ev@Base 3.4.2
- _ZN4geos4util27UniqueCoordinateArrayFilter9filter_roEPKNS_4geom10CoordinateE@Base 3.4.2
  _ZN4geos4util27UniqueCoordinateArrayFilterD0Ev@Base 3.4.2
  _ZN4geos4util27UniqueCoordinateArrayFilterD1Ev@Base 3.4.2
  _ZN4geos4util27UniqueCoordinateArrayFilterD2Ev@Base 3.4.2
@@ -535,11 +585,8 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  (optional=templinst)_ZN4geos5index7strtree15TemplateSTRtreeIPvNS1_14EnvelopeTraitsEED0Ev@Base 3.10.0
  (optional=templinst)_ZN4geos5index7strtree15TemplateSTRtreeIPvNS1_14EnvelopeTraitsEED1Ev@Base 3.10.0
  (optional=templinst)_ZN4geos5index7strtree15TemplateSTRtreeIPvNS1_14EnvelopeTraitsEED2Ev@Base 3.10.0
- (optional=templinst)_ZN4geos5index7strtree19TemplateSTRtreeImplIPvNS1_14EnvelopeTraitsEE17createParentNodesERKN9__gnu_cxx17__normal_iteratorIPNS1_15TemplateSTRNodeIS3_S4_EESt6vectorIS9_SaIS9_EEEESG_@Base 3.10.0
+ (optional=templinst|subst)_ZN4geos5index7strtree19TemplateSTRtreeImplIPvNS1_14EnvelopeTraitsEE17createParentNodesERKN9__gnu_cxx17__normal_iteratorIPNS1_15TemplateSTRNodeIS3_S4_EESt6vectorIS9_SaIS9_EEEE{size_t}@Base 3.10.3
  (optional=templinst)_ZN4geos5index7strtree19TemplateSTRtreeImplIPvNS1_14EnvelopeTraitsEE5buildEv@Base 3.10.0
- (arch=!armel !armhf)_ZN4geos6noding18BasicSegmentStringD0Ev@Base 3.10.0
- (arch=!armel !armhf)_ZN4geos6noding18BasicSegmentStringD1Ev@Base 3.10.0
- (arch=!armel !armhf)_ZN4geos6noding18BasicSegmentStringD2Ev@Base 3.10.0
  _ZN4geos9algorithm9construct18LargestEmptyCircleD1Ev@Base 3.9.0
  _ZN4geos9algorithm9construct18LargestEmptyCircleD2Ev@Base 3.9.0
  _ZN4geos9algorithm9construct22MaximumInscribedCircleD1Ev@Base 3.9.0
@@ -551,70 +598,63 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  _ZN4geos9operation10polygonize11PolygonizerD2Ev@Base 3.8.0
  _ZN4geos9operation6buffer8BufferOpD1Ev@Base 3.10.0
  _ZN4geos9operation6buffer8BufferOpD2Ev@Base 3.10.0
- (arch=!armel !armhf)_ZN4geos9operation9overlayng11OverlayEdgeD0Ev@Base 3.10.0
- (arch=!armel !armhf)_ZN4geos9operation9overlayng11OverlayEdgeD1Ev@Base 3.10.0
- (arch=!armel !armhf)_ZN4geos9operation9overlayng11OverlayEdgeD2Ev@Base 3.10.0
- (optional=templinst)_ZNK4geos4geom15GeometryFactory24createGeometryCollectionINS0_8GeometryEEESt10unique_ptrINS0_18GeometryCollectionESt14default_deleteIS5_EEOSt6vectorIS4_IT_S6_ISA_EESaISC_EE@Base 3.9.0
+ _ZN4geos9operation7cluster31GeometryIntersectsClusterFinder10shouldJoinEPKNS_4geom8GeometryES6_@Base 3.12.0
+ _ZN4geos9operation7cluster31GeometryIntersectsClusterFinder13queryEnvelopeEPKNS_4geom8GeometryE@Base 3.12.0
  _ZNK4geos4geom16CoordinateFilter9filter_rwEPNS0_10CoordinateE@Base 3.4.2
- (subst)_ZNK4geos4geom18CoordinateSequence4getXE{size_t}@Base 3.8.0
- (subst)_ZNK4geos4geom18CoordinateSequence4getYE{size_t}@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EE12getDimensionEv@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EE5cloneEv@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EE5getAtE{size_t}@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EE5getAtE{size_t}RNS0_10CoordinateE@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EE7getSizeEv@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EE7isEmptyEv@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EE8apply_roEPNS0_16CoordinateFilterE@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EE8toVectorERSt6vectorINS0_10CoordinateESaIS4_EE@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EE12getDimensionEv@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EE5cloneEv@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EE5getAtE{size_t}@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EE5getAtE{size_t}RNS0_10CoordinateE@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EE7getSizeEv@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EE7isEmptyEv@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EE8apply_roEPNS0_16CoordinateFilterE@Base 3.8.0
- (optional=templinst|subst)_ZNK4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EE8toVectorERSt6vectorINS0_10CoordinateESaIS4_EE@Base 3.8.0
+ _ZNK4geos4geom16CoordinateFilter9filter_rwEPNS0_12CoordinateXYE@Base 3.12.0
+ _ZNK4geos4geom16CoordinateFilter9filter_rwEPNS0_13CoordinateXYME@Base 3.12.0
+ _ZNK4geos4geom16CoordinateFilter9filter_rwEPNS0_14CoordinateXYZME@Base 3.12.0
  _ZNK4geos4geom8Geometry7getSRIDEv@Base 3.4.2
- (arch=!armel !armhf|subst)_ZNK4geos6noding18BasicSegmentString13getCoordinateE{size_t}@Base 3.10.0
- (arch=!armel !armhf)_ZNK4geos6noding18BasicSegmentString14getCoordinatesEv@Base 3.10.0
- (arch=!armel !armhf)_ZNK4geos6noding18BasicSegmentString4sizeEv@Base 3.10.0
- (arch=!armel !armhf)_ZNK4geos6noding18BasicSegmentString8isClosedEv@Base 3.10.0
- (arch=!armel !armhf)_ZNK4geos9operation9overlayng11OverlayEdge11directionPtEv@Base 3.10.0
- (optional=templinst)_ZNSt10unique_ptrIN4geos11triangulate8quadedge19QuadEdgeSubdivisionESt14default_deleteIS3_EED1Ev@Base 3.9.0
- (optional=templinst)_ZNSt10unique_ptrIN4geos11triangulate8quadedge19QuadEdgeSubdivisionESt14default_deleteIS3_EED2Ev@Base 3.9.0
+ (optional=templinst)_ZNSt10unique_ptrIN4geos11triangulate8quadedge19QuadEdgeSubdivisionESt14default_deleteIS3_EED1Ev@Base 3.12.1
+ (optional=templinst)_ZNSt10unique_ptrIN4geos11triangulate8quadedge19QuadEdgeSubdivisionESt14default_deleteIS3_EED2Ev@Base 3.12.1
  (optional=templinst)_ZNSt10unique_ptrIN4geos4geom10LineStringESt14default_deleteIS2_EED1Ev@Base 3.9.0
  (optional=templinst)_ZNSt10unique_ptrIN4geos4geom10LineStringESt14default_deleteIS2_EED2Ev@Base 3.9.0
- (optional=templinst)_ZNSt10unique_ptrIN4geos4geom18CoordinateSequenceESt14default_deleteIS2_EED1Ev@Base 3.9.0
- (optional=templinst)_ZNSt10unique_ptrIN4geos4geom18CoordinateSequenceESt14default_deleteIS2_EED2Ev@Base 3.9.0
+ (optional=templinst)_ZNSt10unique_ptrIN4geos4geom10MultiPointESt14default_deleteIS2_EED1Ev@Base 3.12.0
+ (optional=templinst)_ZNSt10unique_ptrIN4geos4geom10MultiPointESt14default_deleteIS2_EED2Ev@Base 3.12.0
+ (optional=templinst)_ZNSt10unique_ptrIN4geos4geom14PrecisionModelESt14default_deleteIS2_EED1Ev@Base 3.12.0
+ (optional=templinst)_ZNSt10unique_ptrIN4geos4geom14PrecisionModelESt14default_deleteIS2_EED2Ev@Base 3.12.0
+ (optional=templinst)_ZNSt10unique_ptrIN4geos4geom18IntersectionMatrixESt14default_deleteIS2_EED1Ev@Base 3.12.0
+ (optional=templinst)_ZNSt10unique_ptrIN4geos4geom18IntersectionMatrixESt14default_deleteIS2_EED2Ev@Base 3.12.0
  (optional=templinst)_ZNSt10unique_ptrIN4geos4geom5PointESt14default_deleteIS2_EED1Ev@Base 3.9.0
  (optional=templinst)_ZNSt10unique_ptrIN4geos4geom5PointESt14default_deleteIS2_EED2Ev@Base 3.9.0
  (optional=templinst)_ZNSt10unique_ptrIN4geos4geom8GeometryESt14default_deleteIS2_EED1Ev@Base 3.9.0
  (optional=templinst)_ZNSt10unique_ptrIN4geos4geom8GeometryESt14default_deleteIS2_EED2Ev@Base 3.9.0
- (optional=templinst)_ZNSt10unique_ptrISt6vectorIPN4geos4geom8GeometryESaIS4_EESt14default_deleteIS6_EED1Ev@Base 3.9.0
- (optional=templinst)_ZNSt10unique_ptrISt6vectorIPN4geos4geom8GeometryESaIS4_EESt14default_deleteIS6_EED2Ev@Base 3.9.0
- (optional=templinst)_ZNSt6vectorIN4geos5index7strtree15TemplateSTRNodeIPvNS2_14EnvelopeTraitsEEESaIS6_EE17_M_realloc_insertIJRPKS6_SC_EEEvN9__gnu_cxx17__normal_iteratorIPS6_S8_EEDpOT_@Base 3.10.0
+ (optional=templinst)_ZNSt10unique_ptrIN4geos9operation5valid23TopologyValidationErrorESt14default_deleteIS3_EED1Ev@Base 3.12.0
+ (optional=templinst)_ZNSt10unique_ptrIN4geos9operation5valid23TopologyValidationErrorESt14default_deleteIS3_EED2Ev@Base 3.12.0
+ (optional=templinst|arch=!mipsel)_ZNSt6vectorIN4geos5index7strtree15TemplateSTRNodeIPvNS2_14EnvelopeTraitsEEESaIS6_EE17_M_realloc_insertIJRPKS6_SC_EEEvN9__gnu_cxx17__normal_iteratorIPS6_S8_EEDpOT_@Base 3.10.0
  (optional=templinst)_ZNSt6vectorIN4geos5index7strtree15TemplateSTRNodeIPvNS2_14EnvelopeTraitsEEESaIS6_EE17_M_realloc_insertIJS4_RKNS0_4geom8EnvelopeEEEEvN9__gnu_cxx17__normal_iteratorIPS6_S8_EEDpOT_@Base 3.10.0
+ (optional=templinst|arch=!amd64 !mips64el !x32|subst)_ZNSt6vectorIN4geos5index7strtree15TemplateSTRNodeIPvNS2_14EnvelopeTraitsEEESaIS6_EE7reserveE{size_t}@Base 3.12.0
  _ZNSt6vectorIPKN4geos4geom10CoordinateESaIS4_EE17_M_realloc_insertIJRKS4_EEEvN9__gnu_cxx17__normal_iteratorIPS4_S6_EEDpOT_@Base 3.7.0
- (optional=templinst)_ZNSt6vectorIPN4geos4geom8GeometryESaIS3_EE17_M_realloc_insertIJRKS3_EEEvN9__gnu_cxx17__normal_iteratorIPS3_S5_EEDpOT_@Base 3.9.0
- (optional=templinst)_ZNSt6vectorIPN4geos4geom8GeometryESaIS3_EE17_M_realloc_insertIJS3_EEEvN9__gnu_cxx17__normal_iteratorIPS3_S5_EEDpOT_@Base 3.9.0
- (optional=templinst|subst)_ZNSt6vectorIPN4geos4geom8GeometryESaIS3_EE7reserveE{size_t}@Base 3.7.1
+ (optional=templinst)_ZNSt6vectorIPKN4geos4geom10CoordinateESaIS4_EE17_M_realloc_insertIJS4_EEEvN9__gnu_cxx17__normal_iteratorIPS4_S6_EEDpOT_@Base 3.12.0
+ (optional=templinst)_ZNSt6vectorIPKN4geos4geom8GeometryESaIS4_EE17_M_realloc_insertIJS4_EEEvN9__gnu_cxx17__normal_iteratorIPS4_S6_EEDpOT_@Base 3.12.0
+ (optional=templinst)_ZNSt6vectorIPKN4geos4geom8GeometryESaIS4_EED1Ev@Base 3.12.1
+ (optional=templinst)_ZNSt6vectorIPKN4geos4geom8GeometryESaIS4_EED2Ev@Base 3.12.1
+ (optional=templinst)_ZNSt6vectorIPN4geos4geom10LineStringESaIS3_EED1Ev@Base 3.12.1
+ (optional=templinst)_ZNSt6vectorIPN4geos4geom10LineStringESaIS3_EED2Ev@Base 3.12.1
  (optional=templinst)_ZNSt6vectorIPvSaIS0_EE17_M_realloc_insertIJS0_EEEvN9__gnu_cxx17__normal_iteratorIPS0_S2_EEDpOT_@Base 3.10.0
+ (optional=templinst)_ZNSt6vectorISt10unique_ptrIN4geos4geom10LineStringESt14default_deleteIS3_EESaIS6_EED1Ev@Base 3.11.0
+ (optional=templinst)_ZNSt6vectorISt10unique_ptrIN4geos4geom10LineStringESt14default_deleteIS3_EESaIS6_EED2Ev@Base 3.11.0
  (optional=templinst)_ZNSt6vectorISt10unique_ptrIN4geos4geom7PolygonESt14default_deleteIS3_EESaIS6_EED1Ev@Base 3.9.0
  (optional=templinst)_ZNSt6vectorISt10unique_ptrIN4geos4geom7PolygonESt14default_deleteIS3_EESaIS6_EED2Ev@Base 3.9.0
+ (optional=templinst)_ZNSt6vectorISt10unique_ptrIN4geos4geom8GeometryESt14default_deleteIS3_EESaIS6_EE17_M_realloc_insertIJRPNS2_10LineStringEEEEvN9__gnu_cxx17__normal_iteratorIPS6_S8_EEDpOT_@Base 3.12.0
+ (optional=templinst)_ZNSt6vectorISt10unique_ptrIN4geos4geom8GeometryESt14default_deleteIS3_EESaIS6_EE17_M_realloc_insertIJS6_EEEvN9__gnu_cxx17__normal_iteratorIPS6_S8_EEDpOT_@Base 3.12.0
+ (optional=templinst|arch=!amd64 !arm64 !ia64 !mips64el !ppc64 !ppc64el !riscv64 !s390x !sparc64)_ZNSt6vectorISt10unique_ptrIN4geos4geom8GeometryESt14default_deleteIS3_EESaIS6_EE7reserveEj@Base 3.12.0
+ (optional=templinst)_ZNSt6vectorISt10unique_ptrIN4geos4geom8GeometryESt14default_deleteIS3_EESaIS6_EE7reserveEm@Base 3.12.0
  (optional=templinst)_ZNSt6vectorISt10unique_ptrIN4geos4geom8GeometryESt14default_deleteIS3_EESaIS6_EED1Ev@Base 3.9.0
  (optional=templinst)_ZNSt6vectorISt10unique_ptrIN4geos4geom8GeometryESt14default_deleteIS3_EESaIS6_EED2Ev@Base 3.9.0
+ (optional=templinst|arch=!amd64 !arm64 !ia64 !mips64el !ppc64 !ppc64el !riscv64 !s390x !sparc64)_ZNSt6vectorIdSaIdEE14_M_fill_insertEN9__gnu_cxx17__normal_iteratorIPdS1_EEjRKd@Base 3.12.0
+ (optional=templinst)_ZNSt6vectorIdSaIdEE14_M_fill_insertEN9__gnu_cxx17__normal_iteratorIPdS1_EEmRKd@Base 3.12.0
  (optional=templinst)_ZNSt7__cxx1115basic_stringbufIcSt11char_traitsIcESaIcEED0Ev@Base 3.4.2
  (optional=templinst)_ZNSt7__cxx1115basic_stringbufIcSt11char_traitsIcESaIcEED1Ev@Base 3.4.2
  (optional=templinst)_ZNSt7__cxx1115basic_stringbufIcSt11char_traitsIcESaIcEED2Ev@Base 3.4.2
- (optional=templinst)_ZNSt8_Rb_treeIPKN4geos4geom10CoordinateES4_St9_IdentityIS4_ENS1_18CoordinateLessThenESaIS4_EE8_M_eraseEPSt13_Rb_tree_nodeIS4_E@Base 3.4.2
- (optional=templinst|arch=!amd64)_ZSt13__heap_selectIN9__gnu_cxx17__normal_iteratorIPN4geos5index7strtree15TemplateSTRNodeIPvNS4_14EnvelopeTraitsEEESt6vectorIS8_SaIS8_EEEENS0_5__ops15_Iter_comp_iterIZNS4_19TemplateSTRtreeImplIS6_S7_E10sortNodesXERKSD_SJ_EUlRKS8_SL_E_EEEvT_SO_SO_T0_@Base 3.10.1
- (optional=templinst|arch=!amd64)_ZSt13__heap_selectIN9__gnu_cxx17__normal_iteratorIPN4geos5index7strtree15TemplateSTRNodeIPvNS4_14EnvelopeTraitsEEESt6vectorIS8_SaIS8_EEEENS0_5__ops15_Iter_comp_iterIZNS4_19TemplateSTRtreeImplIS6_S7_E10sortNodesYERKSD_SJ_EUlRKS8_SL_E_EEEvT_SO_SO_T0_@Base 3.10.1
+ (optional=templinst)_ZNSt8_Rb_treeIPKN4geos4geom12CoordinateXYES4_St9_IdentityIS4_ENS1_18CoordinateLessThanESaIS4_EE16_M_insert_uniqueIS4_EESt4pairISt17_Rb_tree_iteratorIS4_EbEOT_@Base 3.12.0
+ (optional=templinst|arch=!amd64 !arm64 !hppa !ia64 !mips64el !ppc64 !ppc64el !riscv64 !s390x !sh4 !sparc64 !x32)_ZSt13__heap_selectIN9__gnu_cxx17__normal_iteratorIPN4geos5index7strtree15TemplateSTRNodeIPvNS4_14EnvelopeTraitsEEESt6vectorIS8_SaIS8_EEEENS0_5__ops15_Iter_comp_iterIZNS4_19TemplateSTRtreeImplIS6_S7_E10sortNodesXERKSD_SJ_EUlRKS8_SL_E_EEEvT_SO_SO_T0_@Base 3.10.1
+ (optional=templinst|arch=!amd64 !arm64 !hppa !ia64 !mips64el !ppc64 !ppc64el !riscv64 !s390x !sh4 !sparc64 !x32)_ZSt13__heap_selectIN9__gnu_cxx17__normal_iteratorIPN4geos5index7strtree15TemplateSTRNodeIPvNS4_14EnvelopeTraitsEEESt6vectorIS8_SaIS8_EEEENS0_5__ops15_Iter_comp_iterIZNS4_19TemplateSTRtreeImplIS6_S7_E10sortNodesYERKSD_SJ_EUlRKS8_SL_E_EEEvT_SO_SO_T0_@Base 3.10.1
  (optional=templinst|subst)_ZSt16__introsort_loopIN9__gnu_cxx17__normal_iteratorIPN4geos5index7strtree15TemplateSTRNodeIPvNS4_14EnvelopeTraitsEEESt6vectorIS8_SaIS8_EEEE{ssize_t}NS0_5__ops15_Iter_comp_iterIZNS4_19TemplateSTRtreeImplIS6_S7_E10sortNodesXERKSD_SJ_EUlRKS8_SL_E_EEEvT_SO_T0_T1_@Base 3.10.0
  (optional=templinst|subst)_ZSt16__introsort_loopIN9__gnu_cxx17__normal_iteratorIPN4geos5index7strtree15TemplateSTRNodeIPvNS4_14EnvelopeTraitsEEESt6vectorIS8_SaIS8_EEEE{ssize_t}NS0_5__ops15_Iter_comp_iterIZNS4_19TemplateSTRtreeImplIS6_S7_E10sortNodesYERKSD_SJ_EUlRKS8_SL_E_EEEvT_SO_T0_T1_@Base 3.10.0
  _ZTI16CAPI_ItemVisitor@Base 3.4.2
  _ZTIN4geos4geom16CoordinateFilterE@Base 3.4.2
- (subst)_ZTIN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EEE@Base 3.8.0
- (subst)_ZTIN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EEE@Base 3.8.0
+ _ZTIN4geos4geom19CoordinateInspectorINS_4util27UniqueCoordinateArrayFilterEEE@Base 3.12.0
  _ZTIN4geos4util13GEOSExceptionE@Base 3.4.2
  _ZTIN4geos4util17TopologyExceptionE@Base 3.4.2
  _ZTIN4geos4util24IllegalArgumentExceptionE@Base 3.4.2
@@ -623,16 +663,13 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  _ZTIN4geos5index12SpatialIndexE@Base 3.10.0
  _ZTIN4geos5index7strtree15TemplateSTRtreeIPvNS1_14EnvelopeTraitsEEE@Base 3.10.0
  _ZTIN4geos5index7strtree19TemplateSTRtreeImplIPvNS1_14EnvelopeTraitsEEE@Base 3.10.0
- (arch=!armel !armhf)_ZTIN4geos6noding18BasicSegmentStringE@Base 3.10.0
- (arch=!armel !armhf)_ZTIN4geos9edgegraph8HalfEdgeE@Base 3.10.0
  _ZTIN4geos9geomgraph8EdgeListE@Base 3.8.0
- (arch=!armel !armhf)_ZTIN4geos9operation9overlayng11OverlayEdgeE@Base 3.10.0
- _ZTIZZ27GEOSCoordSeq_copyToArrays_rENKUlvE_clEvE21CoordinateArrayCopier@Base 3.10.0
- _ZTIZZ27GEOSCoordSeq_copyToBuffer_rENKUlvE_clEvE22CoordinateBufferCopier@Base 3.10.0
+ _ZTIN4geos9operation7cluster31GeometryIntersectsClusterFinderE@Base 3.12.0
+ _ZTIZ22GEOSGeom_transformXY_rE15TransformFilter@Base 3.11.0
+ _ZTIZZ20GEOSOrientPolygons_rENKUlvE_clEvE14OrientPolygons@Base 3.12.0
  _ZTS16CAPI_ItemVisitor@Base 3.4.2
  _ZTSN4geos4geom16CoordinateFilterE@Base 3.4.2
- (subst)_ZTSN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EEE@Base 3.8.0
- (subst)_ZTSN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EEE@Base 3.8.0
+ _ZTSN4geos4geom19CoordinateInspectorINS_4util27UniqueCoordinateArrayFilterEEE@Base 3.12.0
  _ZTSN4geos4util13GEOSExceptionE@Base 3.4.2
  _ZTSN4geos4util17TopologyExceptionE@Base 3.4.2
  _ZTSN4geos4util24IllegalArgumentExceptionE@Base 3.4.2
@@ -641,23 +678,18 @@ libgeos_c.so.1 #PACKAGE# #MINVER#
  _ZTSN4geos5index12SpatialIndexE@Base 3.10.0
  _ZTSN4geos5index7strtree15TemplateSTRtreeIPvNS1_14EnvelopeTraitsEEE@Base 3.10.0
  _ZTSN4geos5index7strtree19TemplateSTRtreeImplIPvNS1_14EnvelopeTraitsEEE@Base 3.10.0
- (arch=!armel !armhf)_ZTSN4geos6noding18BasicSegmentStringE@Base 3.10.0
- (arch=!armel !armhf)_ZTSN4geos9edgegraph8HalfEdgeE@Base 3.10.0
  _ZTSN4geos9geomgraph8EdgeListE@Base 3.8.0
- (arch=!armel !armhf)_ZTSN4geos9operation9overlayng11OverlayEdgeE@Base 3.10.0
+ _ZTSN4geos9operation7cluster31GeometryIntersectsClusterFinderE@Base 3.12.0
  _ZTV16CAPI_ItemVisitor@Base 3.4.2
- (subst)_ZTVN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}1EEE@Base 3.8.0
- (subst)_ZTVN4geos4geom27FixedSizeCoordinateSequenceIL{size_t}2EEE@Base 3.8.0
  _ZTVN4geos4util13GEOSExceptionE@Base 3.4.2
  _ZTVN4geos4util17TopologyExceptionE@Base 3.4.2
  _ZTVN4geos4util24IllegalArgumentExceptionE@Base 3.4.2
  _ZTVN4geos4util27UniqueCoordinateArrayFilterE@Base 3.4.2
  _ZTVN4geos5index7strtree15TemplateSTRtreeIPvNS1_14EnvelopeTraitsEEE@Base 3.10.0
- (arch=!armel !armhf)_ZTVN4geos6noding18BasicSegmentStringE@Base 3.10.0
  _ZTVN4geos9geomgraph8EdgeListE@Base 3.8.0
- (arch=!armel !armhf)_ZTVN4geos9operation9overlayng11OverlayEdgeE@Base 3.10.0
- _ZTVZZ27GEOSCoordSeq_copyToArrays_rENKUlvE_clEvE21CoordinateArrayCopier@Base 3.10.0
- _ZTVZZ27GEOSCoordSeq_copyToBuffer_rENKUlvE_clEvE22CoordinateBufferCopier@Base 3.10.0
+ _ZTVN4geos9operation7cluster31GeometryIntersectsClusterFinderE@Base 3.12.0
+ _ZTVZ22GEOSGeom_transformXY_rE15TransformFilter@Base 3.11.0
+ _ZTVZZ20GEOSOrientPolygons_rENKUlvE_clEvE14OrientPolygons@Base 3.12.0
  _ZZ19getMachineByteOrdervE12endian_check@Base 3.4.2
  finishGEOS@Base 3.4.2
  finishGEOS_r@Base 3.4.2

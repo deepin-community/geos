@@ -10,8 +10,6 @@
 #include <geos/noding/Octant.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateArraySequence.h>
-#include <geos/geom/CoordinateArraySequenceFactory.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/util.h>
 // std
@@ -38,28 +36,26 @@ struct test_nodedsegmentstring_data {
     typedef std::unique_ptr<geos::noding::NodedSegmentString> \
     SegmentStringAutoPtr;
 
-    const geos::geom::CoordinateSequenceFactory* csFactory;
-
     WKTReader r;
 
     SegmentStringAutoPtr
     makeSegmentString(geos::geom::CoordinateSequence* cs, void* d = nullptr)
     {
         return SegmentStringAutoPtr(
-                   new geos::noding::NodedSegmentString(cs, d)
+                   new geos::noding::NodedSegmentString(cs, true, false, d)
                );
     }
 
     std::unique_ptr<Geometry>
     toLines(SegmentString::NonConstVect& ss, const GeometryFactory* gf)
     {
-        std::vector<Geometry *> *lines = new std::vector<Geometry *>();
+        std::vector<std::unique_ptr<Geometry>> lines;
         for (auto s: ss)
         {
             std::unique_ptr<CoordinateSequence> cs = s->getCoordinates()->clone();
-            lines->push_back(gf->createLineString(*cs));
+            lines.push_back(gf->createLineString(std::move(cs)));
         }
-        return std::unique_ptr<Geometry>(gf->createMultiLineString(lines));
+        return gf->createMultiLineString(std::move(lines));
     }
 
     void
@@ -70,7 +66,7 @@ struct test_nodedsegmentstring_data {
         std::unique_ptr<Geometry> line = r.read(wktLine);
         std::unique_ptr<Geometry> pts = r.read(wktNodes);
 
-        NodedSegmentString nss(line->getCoordinates().release(), 0);
+        NodedSegmentString nss(line->getCoordinates().release(), true, false, 0);
         std::unique_ptr<CoordinateSequence> node = pts->getCoordinates();
 
         for (std::size_t i = 0, n=node->size(); i < n; ++i) {
@@ -89,8 +85,6 @@ struct test_nodedsegmentstring_data {
     }
 
     test_nodedsegmentstring_data()
-        :
-        csFactory(geos::geom::CoordinateArraySequenceFactory::instance())
     {
     }
 
@@ -115,7 +109,7 @@ template<>
 void object::test<1>
 ()
 {
-    auto cs = geos::detail::make_unique<geos::geom::CoordinateArraySequence>(0u, 2u);
+    auto cs = geos::detail::make_unique<geos::geom::CoordinateSequence>(0u, 2u);
 
     ensure(nullptr != cs.get());
 
@@ -151,7 +145,7 @@ template<>
 void object::test<2>
 ()
 {
-    auto cs = geos::detail::make_unique<geos::geom::CoordinateArraySequence>(0u, 2u);
+    auto cs = geos::detail::make_unique<geos::geom::CoordinateSequence>(0u, 2u);
 
     ensure(nullptr != cs.get());
 
@@ -187,7 +181,7 @@ template<>
 void object::test<3>
 ()
 {
-    auto cs = geos::detail::make_unique<geos::geom::CoordinateArraySequence>(0u, 2u);
+    auto cs = geos::detail::make_unique<geos::geom::CoordinateSequence>(0u, 2u);
 
     ensure(nullptr != cs.get());
 
@@ -260,7 +254,7 @@ void object::test<5>
     geos::geom::Coordinate p1(10, 0);
 
 
-    auto cs = geos::detail::make_unique<geos::geom::CoordinateArraySequence>(0u, 2u);
+    auto cs = geos::detail::make_unique<geos::geom::CoordinateSequence>(0u, 2u);
     cs->add(p0);
     cs->add(p1);
 

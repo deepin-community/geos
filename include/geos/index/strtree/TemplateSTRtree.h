@@ -250,6 +250,18 @@ public:
         return nearestNeighbour(env, item, id);
     }
 
+    template<typename ItemDistance>
+    bool isWithinDistance(TemplateSTRtreeImpl<ItemType, BoundsTraits>& other, double maxDistance) {
+        ItemDistance itemDist;
+
+        if (!getRoot() || !other.getRoot()) {
+            return false;
+        }
+
+        TemplateSTRtreeDistance<ItemType, BoundsTraits, ItemDistance> td(itemDist);
+        return td.isWithinDistance(*root, *other.root, maxDistance);
+    }
+
     /// @}
     /// \defgroup query Query
     /// @{
@@ -271,6 +283,27 @@ public:
             } else {
                 query(queryEnv, *root, visitor);
             }
+        }
+    }
+
+    // Query the tree for all pairs whose bounds intersect. The visitor must
+    // be callable with arguments (const ItemType&, const ItemType&).
+    // The visitor will be called for each pair once, with first-inserted
+    // item used for the first argument.
+    // The visitor need not return a value, but if it does return a value,
+    // false values will be taken as a signal to stop the query.
+    template<typename Visitor>
+    void queryPairs(Visitor&& visitor) {
+        if (!built()) {
+            build();
+        }
+
+        if (numItems < 2) {
+            return;
+        }
+
+        for (std::size_t i = 0; i < numItems; i++) {
+            queryPairs(nodes[i], *root, visitor);
         }
     }
 
@@ -297,7 +330,9 @@ public:
     void iterate(F&& func) {
         auto n = built() ? numItems : nodes.size();
         for (size_t i = 0; i < n; i++) {
-            func(nodes[i].getItem());
+            if (!nodes[i].isDeleted()) {
+                func(nodes[i].getItem());
+            }
         }
     }
 
@@ -306,6 +341,8 @@ public:
     /// @{
 
     bool remove(const BoundsType& itemEnv, const ItemType& item) {
+        build();
+
         if (root == nullptr) {
             return false;
         }
@@ -359,12 +396,12 @@ public:
 
         // begin and end define a range of nodes needing parents
         auto begin = nodes.begin();
-        auto end = nodes.end();
+        auto number = static_cast<size_t>(std::distance(begin, nodes.end()));
 
-        while (std::distance(begin, end) > 1) {
-            createParentNodes(begin, end);
-            begin = end; // parents just added become children in the next round
-            end = nodes.end();
+        while (number > 1) {
+            createParentNodes(begin, number);
+            std::advance(begin, static_cast<long>(number)); // parents just added become children in the next round
+            number = static_cast<size_t>(std::distance(begin, nodes.end()));
         }
 
         assert(finalSize == nodes.size());
@@ -421,22 +458,24 @@ protected:
         return nodesInTree;
     }
 
-    void createParentNodes(const NodeListIterator& begin, const NodeListIterator& end) {
+    void createParentNodes(const NodeListIterator& begin, size_t number) {
         // Arrange child nodes in two dimensions.
         // First, divide them into vertical slices of a given size (left-to-right)
         // Then create nodes within those slices (bottom-to-top)
-        auto numChildren = static_cast<std::size_t>(std::distance(begin, end));
-        auto numSlices = sliceCount(numChildren);
-        std::size_t nodesPerSlice = sliceCapacity(numChildren, numSlices);
+        auto numSlices = sliceCount(number);
+        std::size_t nodesPerSlice = sliceCapacity(number, numSlices);
 
         // We could sort all of the nodes here, but we don't actually need them to be
         // completely sorted. They need to be sorted enough for each node to end up
         // in the right vertical slice, but their relative position within the slice
         // doesn't matter. So we do a partial sort for each slice below instead.
+        auto end = begin + static_cast<long>(number);
         sortNodesX(begin, end);
 
         auto startOfSlice = begin;
         for (decltype(numSlices) j = 0; j < numSlices; j++) {
+            // end iterator is being invalidated at each iteration
+            end = begin + static_cast<long>(number);
             auto nodesRemaining = static_cast<size_t>(std::distance(startOfSlice, end));
             auto nodesInSlice = std::min(nodesRemaining, nodesPerSlice);
             auto endOfSlice = std::next(startOfSlice, static_cast<long>(nodesInSlice));
@@ -503,6 +542,14 @@ protected:
         return true;
     }
 
+    template<typename Visitor,
+            typename std::enable_if<std::is_void<decltype(std::declval<Visitor>()(std::declval<ItemType>(), std::declval<ItemType>()))>::value, std::nullptr_t>::type = nullptr >
+    bool visitLeaves(Visitor&& visitor, const Node& node1, const Node& node2)
+    {
+        visitor(node1.getItem(), node2.getItem());
+        return true;
+    }
+
     // MSVC 2015 does not implement C++11 expression SFINAE and considers this a
     // redefinition of a previous method
 #if !defined(_MSC_VER) || _MSC_VER >= 1910
@@ -524,6 +571,13 @@ protected:
         return visitor(node.getItem());
     }
 
+    template<typename Visitor,
+            typename std::enable_if<!std::is_void<decltype(std::declval<Visitor>()(std::declval<ItemType>(), std::declval<ItemType>()))>::value, std::nullptr_t>::type = nullptr >
+    bool visitLeaves(Visitor&& visitor, const Node& node1, const Node& node2)
+    {
+        return visitor(node1.getItem(), node2.getItem());
+    }
+
     // MSVC 2015 does not implement C++11 expression SFINAE and considers this a
     // redefinition of a previous method
 #if !defined(_MSC_VER) || _MSC_VER >= 1910
@@ -536,7 +590,7 @@ protected:
 #endif
 
     template<typename Visitor>
-    void query(const BoundsType& queryEnv,
+    bool query(const BoundsType& queryEnv,
                const Node& node,
                Visitor&& visitor) {
 
@@ -544,15 +598,48 @@ protected:
 
         for (auto *child = node.beginChildren(); child < node.endChildren(); ++child) {
             if (child->boundsIntersect(queryEnv)) {
-                if (child->isLeaf() && !child->isDeleted()) {
-                    if (!visitLeaf(visitor, *child)) {
-                        return;
+                if (child->isLeaf()) {
+                    if (!child->isDeleted()) {
+                        if (!visitLeaf(visitor, *child)) {
+                            return false; // abort query
+                        }
                     }
                 } else {
-                    query(queryEnv, *child, visitor);
+                    if (!query(queryEnv, *child, visitor)) {
+                        return false; // abort query
+                    }
                 }
             }
         }
+        return true; // continue searching
+    }
+
+    template<typename Visitor>
+    bool queryPairs(const Node& queryNode,
+                    const Node& searchNode,
+                    Visitor&& visitor) {
+
+        assert(!searchNode.isLeaf());
+
+        for (auto* child = searchNode.beginChildren(); child < searchNode.endChildren(); ++child) {
+            if (child->isLeaf()) {
+                // Only visit leaf nodes if they have a higher address than the query node,
+                // to avoid processing the same pairs twice.
+                if (child > &queryNode && !child->isDeleted() && child->boundsIntersect(queryNode.getBounds())) {
+                    if (!visitLeaves(visitor, queryNode, *child)) {
+                        return false; // abort query
+                    }
+                }
+            } else {
+                if (child->boundsIntersect(queryNode.getBounds())) {
+                    if (!queryPairs(queryNode, *child, visitor)) {
+                        return false; // abort query
+                    }
+                }
+            }
+        }
+
+        return true; // continue searching
     }
 
     bool remove(const BoundsType& queryEnv,
@@ -608,6 +695,10 @@ struct EnvelopeTraits {
 
     static double distance(const BoundsType& a, const BoundsType& b) {
         return a.distance(b);
+    }
+
+    static double maxDistance(const BoundsType& a, const BoundsType& b) {
+        return a.maxDistance(b);
     }
 
     static BoundsType empty() {

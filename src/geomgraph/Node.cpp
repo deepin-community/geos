@@ -29,6 +29,7 @@
 #include <geos/util.h>
 
 #include <cmath>
+#include <memory>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -239,7 +240,7 @@ Node::computeMergedLocation(const Label& label2, uint8_t eltIndex)
 
 /*public*/
 std::string
-Node::print()
+Node::print() const
 {
     testInvariant();
 

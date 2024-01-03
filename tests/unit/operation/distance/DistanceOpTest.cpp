@@ -16,7 +16,7 @@
 #include <geos/io/WKTReader.h>
 #include <geos/io/WKBReader.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateArraySequence.h>
+#include <geos/util.h>
 // std
 #include <memory>
 #include <string>
@@ -78,7 +78,7 @@ void object::test<2>
     using geos::geom::Coordinate;
 
     std::string wkt0("POINT(0 0)");
-    std::string wkt1("MULTIPOINT(10 0, 50 30)");
+    std::string wkt1("MULTIPOINT((10 0), (50 30))");
     GeomPtr g0(wktreader.read(wkt0));
     GeomPtr g1(wktreader.read(wkt1));
 
@@ -171,7 +171,7 @@ void object::test<6>
 
     std::string wkt0("POINT(35 60)");
     std::string
-    wkt1("MULTIPOLYGON(((34 54, 60 34, 60 54, 34 54),(50 50, 52 50, 52 48, 50 48, 50 50)),( (100 100, 150 100, 150 150, 100 150, 100 100),(120 120, 120 130, 130 130, 130 120, 120 120)) ))");
+    wkt1("MULTIPOLYGON(((34 54, 60 34, 60 54, 34 54),(50 50, 52 50, 52 48, 50 48, 50 50)),( (100 100, 150 100, 150 150, 100 150, 100 100),(120 120, 120 130, 130 130, 130 120, 120 120)))");
     GeomPtr g0(wktreader.read(wkt0));
     GeomPtr g1(wktreader.read(wkt1));
 
@@ -197,7 +197,7 @@ void object::test<7>
 
     // This is an invalid geom... anyway
     std::string
-    wkt1("GEOMETRYCOLLECTION(MULTIPOLYGON(((34 54, 60 34, 60 54, 34 54),(50 50, 52 50, 52 48, 50 48, 50 50)),( (100 100, 150 100, 150 150, 100 150, 100 100),(120 120, 120 130, 130 130, 130 120, 120 120)) )), POLYGON((34 54, 60 34, 60 54, 34 54),(50 50, 52 50, 52 48, 50 48, 50 50)), MULTILINESTRING((34 54, 60 34),(0 10, 50 10, 100 50)), LINESTRING(0 10, 50 10, 100 50), MULTIPOINT(10 0, 50 30), POINT(10 0))");
+    wkt1("GEOMETRYCOLLECTION(MULTIPOLYGON(((34 54, 60 34, 60 54, 34 54),(50 50, 52 50, 52 48, 50 48, 50 50)),( (100 100, 150 100, 150 150, 100 150, 100 100),(120 120, 120 130, 130 130, 130 120, 120 120)) ), POLYGON((34 54, 60 34, 60 54, 34 54),(50 50, 52 50, 52 48, 50 48, 50 50)), MULTILINESTRING((34 54, 60 34),(0 10, 50 10, 100 50)), LINESTRING(0 10, 50 10, 100 50), MULTIPOINT((10 0), (50 30)), POINT(10 0))");
 
     GeomPtr g0(wktreader.read(wkt0));
     GeomPtr g1(wktreader.read(wkt1));
@@ -242,7 +242,7 @@ void object::test<9>
     using geos::operation::distance::DistanceOp;
     using geos::geom::Coordinate;
 
-    std::string wkt0("MULTIPOINT(10 0, 50 30)");
+    std::string wkt0("MULTIPOINT((10 0), (50 30))");
     std::string wkt1("POINT(10 0)");
     GeomPtr g0(wktreader.read(wkt0));
     GeomPtr g1(wktreader.read(wkt1));
@@ -265,8 +265,8 @@ void object::test<10>
     using geos::operation::distance::DistanceOp;
     using geos::geom::Coordinate;
 
-    std::string wkt0("MULTIPOINT(10 0, 50 30)");
-    std::string wkt1("MULTIPOINT(0 0, 150 30)");
+    std::string wkt0("MULTIPOINT((10 0), (50 30))");
+    std::string wkt1("MULTIPOINT((0 0), (150 30))");
     GeomPtr g0(wktreader.read(wkt0));
     GeomPtr g1(wktreader.read(wkt1));
 
@@ -288,7 +288,7 @@ void object::test<11>
     using geos::operation::distance::DistanceOp;
     using geos::geom::Coordinate;
 
-    std::string wkt0("MULTIPOINT(3 0, 200 30)");
+    std::string wkt0("MULTIPOINT((3 0), (200 30))");
     std::string wkt1("LINESTRING(0 10, 50 10, 100 50)");
     GeomPtr g0(wktreader.read(wkt0));
     GeomPtr g1(wktreader.read(wkt1));
@@ -311,7 +311,7 @@ void object::test<12>
     using geos::operation::distance::DistanceOp;
     using geos::geom::Coordinate;
 
-    std::string wkt0("MULTIPOINT(3 0, -50 30)");
+    std::string wkt0("MULTIPOINT((3 0), (-50 30))");
     std::string wkt1("MULTILINESTRING((34 54, 60 34),(0 10, 50 10, 100 50))");
     GeomPtr g0(wktreader.read(wkt0));
     GeomPtr g1(wktreader.read(wkt1));
@@ -334,7 +334,7 @@ void object::test<13>
     using geos::operation::distance::DistanceOp;
     using geos::geom::Coordinate;
 
-    std::string wkt0("MULTIPOINT(-100 0, 35 60)");
+    std::string wkt0("MULTIPOINT((-100 0), (35 60))");
     std::string wkt1("POLYGON((34 54, 60 34, 60 54, 34 54),(50 50, 52 50, 52 48, 50 48, 50 50))");
     GeomPtr g0(wktreader.read(wkt0));
     GeomPtr g1(wktreader.read(wkt1));
@@ -357,9 +357,9 @@ void object::test<14>
     using geos::operation::distance::DistanceOp;
     using geos::geom::Coordinate;
 
-    std::string wkt0("MULTIPOINT(-100 0, 35 60)");
+    std::string wkt0("MULTIPOINT((-100 0), (35 60))");
     std::string
-    wkt1("MULTIPOLYGON(((34 54, 60 34, 60 54, 34 54),(50 50, 52 50, 52 48, 50 48, 50 50)),( (100 100, 150 100, 150 150, 100 150, 100 100),(120 120, 120 130, 130 130, 130 120, 120 120)) ))");
+    wkt1("MULTIPOLYGON(((34 54, 60 34, 60 54, 34 54),(50 50, 52 50, 52 48, 50 48, 50 50)),( (100 100, 150 100, 150 150, 100 150, 100 100),(120 120, 120 130, 130 130, 130 120, 120 120)))");
     GeomPtr g0(wktreader.read(wkt0));
     GeomPtr g1(wktreader.read(wkt1));
 
@@ -380,11 +380,11 @@ void object::test<15>
     using geos::operation::distance::DistanceOp;
     using geos::geom::Coordinate;
 
-    std::string wkt0("MULTIPOINT(-100 0, 35 60)");
+    std::string wkt0("MULTIPOINT((-100 0), (35 60))");
 
     // This is an invalid geom... anyway
     std::string
-    wkt1("GEOMETRYCOLLECTION(MULTIPOLYGON(((34 54, 60 34, 60 54, 34 54),(50 50, 52 50, 52 48, 50 48, 50 50)),( (100 100, 150 100, 150 150, 100 150, 100 100),(120 120, 120 130, 130 130, 130 120, 120 120)) )), POLYGON((34 54, 60 34, 60 54, 34 54),(50 50, 52 50, 52 48, 50 48, 50 50)), MULTILINESTRING((34 54, 60 34),(0 10, 50 10, 100 50)), LINESTRING(0 10, 50 10, 100 50), MULTIPOINT(10 0, 50 30), POINT(10 0))");
+    wkt1("GEOMETRYCOLLECTION(MULTIPOLYGON(((34 54, 60 34, 60 54, 34 54),(50 50, 52 50, 52 48, 50 48, 50 50)),( (100 100, 150 100, 150 150, 100 150, 100 100),(120 120, 120 130, 130 130, 130 120, 120 120)) ), POLYGON((34 54, 60 34, 60 54, 34 54),(50 50, 52 50, 52 48, 50 48, 50 50)), MULTILINESTRING((34 54, 60 34),(0 10, 50 10, 100 50)), LINESTRING(0 10, 50 10, 100 50), MULTIPOINT((10 0), (50 30)), POINT(10 0))");
 
     GeomPtr g0(wktreader.read(wkt0));
     GeomPtr g1(wktreader.read(wkt1));
@@ -407,7 +407,7 @@ void object::test<16>
     using geos::operation::distance::DistanceOp;
     using geos::geom::Coordinate;
 
-    std::string wkt0("MULTIPOINT(-100 0, 35 60)");
+    std::string wkt0("MULTIPOINT((-100 0), (35 60))");
 
     // This is an invalid geom... anyway
     std::string wkt1("GEOMETRYCOLLECTION EMPTY");
@@ -513,12 +513,12 @@ void object::test<20>()
     using geos::geom::Geometry;
     using geos::geom::LineString;
     using geos::geom::GeometryFactory;
-    using geos::geom::CoordinateArraySequence;
+    using geos::geom::CoordinateSequence;
 
     auto gfact = GeometryFactory::create();
 
-    CSPtr seq0(new CoordinateArraySequence(2));
-    CSPtr seq1(new CoordinateArraySequence(2));
+    auto seq0 = geos::detail::make_unique<CoordinateSequence>(2u);
+    auto seq1 = geos::detail::make_unique<CoordinateSequence>(2u);
 
     Coordinate a0{1, 5.0/3.0};
     Coordinate a1{2, 10.0/3.0};
@@ -532,8 +532,8 @@ void object::test<20>()
     seq1->setAt(b0, 0);
     seq1->setAt(b1, 1);
 
-    GeomPtr g0(gfact->createLineString(seq0.release()));
-    GeomPtr g1(gfact->createLineString(seq1.release()));
+    auto g0 = gfact->createLineString(std::move(seq0));
+    auto g1 = gfact->createLineString(std::move(seq1));
 
     DistanceOp dist(g0.get(), g1.get());
     CSPtr seq(dist.nearestPoints());
@@ -564,6 +564,85 @@ void object::test<21>()
 
     ensure_equals(g1->distance(g2.get()), 1.9996999774966246);
 }
+
+//
+// Variations on a theme: testing EMPTY and collections with EMPTY
+//
+
+// Ignoring empty component
+template<>
+template<>
+void object::test<22>()
+{
+    auto g1 = wktreader.read("GEOMETRYCOLLECTION (POINT EMPTY, LINESTRING (0 0, 1 1))");
+    auto g2 = wktreader.read("POINT (1 2)");
+
+    ensure_equals(g1->distance(g2.get()), 1);
+    ensure_equals(g2->distance(g1.get()), 1);
+}
+
+// Empty is same as empty so zero...?
+template<>
+template<>
+void object::test<23>()
+{
+    auto g1 = wktreader.read("POINT EMPTY");
+    auto g2 = wktreader.read("LINESTRING EMPTY");
+
+    ensure(g1 != nullptr && g2 != nullptr);
+    ensure_equals(g1->distance(g2.get()), 0);
+    ensure_equals(g2->distance(g1.get()), 0);
+}
+
+template<>
+template<>
+void object::test<24>()
+{
+    auto g1 = wktreader.read("GEOMETRYCOLLECTION(POINT EMPTY, LINESTRING EMPTY)");
+    auto g2 = wktreader.read("LINESTRING EMPTY");
+
+    ensure(g1 != nullptr && g2 != nullptr);
+    ensure_equals(g1->distance(g2.get()), 0);
+    ensure_equals(g2->distance(g1.get()), 0);
+}
+
+// But ignore empty if there's a real distance?
+template<>
+template<>
+void object::test<25>()
+{
+    auto g1 = wktreader.read("GEOMETRYCOLLECTION(LINESTRING EMPTY, POINT(2 1))");
+    auto g2 = wktreader.read("POINT(1 1)");
+
+    ensure(g1 != nullptr && g2 != nullptr);
+    ensure_equals(g1->distance(g2.get()), 1);
+    ensure_equals(g2->distance(g1.get()), 1);
+}
+
+template<>
+template<>
+void object::test<26>()
+{
+    auto g1 = wktreader.read("GEOMETRYCOLLECTION(POINT(-2 0), POINT EMPTY)");
+    auto g2 = wktreader.read("GEOMETRYCOLLECTION(POINT(1 0),LINESTRING(0 0,1 0))");
+
+    ensure(g1 != nullptr && g2 != nullptr);
+    ensure_equals(g1->distance(g2.get()), 2);
+    ensure_equals(g2->distance(g1.get()), 2);
+}
+
+template<>
+template<>
+void object::test<27>()
+{
+    auto g1 = wktreader.read("GEOMETRYCOLLECTION(POINT EMPTY)");
+    auto g2 = wktreader.read("GEOMETRYCOLLECTION(POINT(1 0))");
+
+    ensure(g1 != nullptr && g2 != nullptr);
+    ensure_equals(g1->distance(g2.get()), 0);
+    ensure_equals(g2->distance(g1.get()), 0);
+}
+
 
 // TODO: finish the tests by adding:
 // 	LINESTRING - *all*

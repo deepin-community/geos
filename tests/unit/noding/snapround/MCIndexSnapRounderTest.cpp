@@ -14,7 +14,6 @@
 #include <geos/io/WKBReader.h>
 #include <geos/geom/PrecisionModel.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateArraySequenceFactory.h>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/LineString.h>
@@ -62,19 +61,19 @@ struct test_mcidxsnprndr_data {
     GeomPtr
     getGeometry(SegStrVct& vct)
     {
-        GeomVct* lines = new GeomVct;
+        std::vector<std::unique_ptr<Geometry>> lines;
         for(SegStrVct::size_type i = 0, n = vct.size(); i < n; ++i) {
             SegmentString* ss = vct[i];
-            lines->push_back(gf_->createLineString(*(ss->getCoordinates())));
+            lines.push_back(gf_->createLineString(*(ss->getCoordinates())));
         }
-        return GeomPtr(gf_->createMultiLineString(lines));
+        return gf_->createMultiLineString(std::move(lines));
     }
 
     void
     getSegmentStrings(const Geometry& g, SegStrVct& vct)
     {
         CoordSeqPtr s(g.getCoordinates());
-        vct.push_back(new NodedSegmentString(s.release(), nullptr));
+        vct.push_back(new NodedSegmentString(s.release(), g.hasZ(), g.hasM(), nullptr));
     }
 
     GeomPtr

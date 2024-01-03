@@ -20,7 +20,6 @@ namespace tut {
 // Common data used in test cases.
 struct test_capigeosdelaunaytriangulation_data : public capitest::utility {
     test_capigeosdelaunaytriangulation_data() {
-        GEOSWKTWriter_setTrim(wktw_, 1);
     }
 };
 
@@ -80,7 +79,7 @@ template<>
 void object::test<3>
 ()
 {
-    geom1_ = GEOSGeomFromWKT("MULTIPOINT(0 0, 5 0, 10 0)");
+    geom1_ = GEOSGeomFromWKT("MULTIPOINT((0 0), (5 0), (10 0))");
 
     geom2_ = GEOSDelaunayTriangulation(geom1_, 0, 0);
     ensure_equals(GEOSisEmpty(geom2_), 1);
@@ -100,7 +99,7 @@ template<>
 void object::test<4>
 ()
 {
-    geom1_ = GEOSGeomFromWKT("MULTIPOINT(0 0, 5 0, 10 10)");
+    geom1_ = GEOSGeomFromWKT("MULTIPOINT((0 0), (5 0), (10 10))");
 
     geom2_ = GEOSDelaunayTriangulation(geom1_, 0, 0);
     ensure(geom2_ != nullptr);
@@ -113,13 +112,13 @@ void object::test<4>
                       "MULTILINESTRING ((5 0, 10 10), (0 0, 10 10), (0 0, 5 0))");
 }
 
-// A polygon with an hole
+// A polygon with a hole
 template<>
 template<>
 void object::test<5>
 ()
 {
-    geom1_ = GEOSGeomFromWKT("POLYGON((0 0, 8.5 1, 10 10, 0.5 9, 0 0),(2 2, 3 8, 7 8, 8 2, 2 2)))");
+    geom1_ = GEOSGeomFromWKT("POLYGON((0 0, 8.5 1, 10 10, 0.5 9, 0 0),(2 2, 3 8, 7 8, 8 2, 2 2))");
 
     geom2_ = GEOSDelaunayTriangulation(geom1_, 0, 0);
     ensure(geom2_ != nullptr);
@@ -138,7 +137,7 @@ template<>
 void object::test<6>
 ()
 {
-    geom1_ = GEOSGeomFromWKT("MULTIPOINT(0 0, 10 0, 10 10, 11 10)");
+    geom1_ = GEOSGeomFromWKT("MULTIPOINT((0 0), (10 0), (10 10), (11 10))");
 
     GEOSGeom_destroy(geom2_);
     geom2_ = GEOSDelaunayTriangulation(geom1_, 2, 1);

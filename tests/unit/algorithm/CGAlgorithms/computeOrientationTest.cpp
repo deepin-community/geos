@@ -8,7 +8,6 @@
 #include <geos/algorithm/Orientation.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/CoordinateSequence.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/Polygon.h>
 #include <geos/io/WKTReader.h>
@@ -50,9 +49,9 @@ void object::test<1>
 
     CoordinateSequence::Ptr pts(geom->getCoordinates());
 
-    int const a = Orientation::index(pts->getAt(0), pts->getAt(1), pts->getAt(2));
-    int const b = Orientation::index(pts->getAt(0), pts->getAt(1), pts->getAt(2));
-    int const c = Orientation::index(pts->getAt(0), pts->getAt(1), pts->getAt(2));
+    int const a = Orientation::index(pts->getAt<CoordinateXY>(0), pts->getAt<CoordinateXY>(1), pts->getAt<CoordinateXY>(2));
+    int const b = Orientation::index(pts->getAt<CoordinateXY>(0), pts->getAt<CoordinateXY>(1), pts->getAt<CoordinateXY>(2));
+    int const c = Orientation::index(pts->getAt<CoordinateXY>(0), pts->getAt<CoordinateXY>(1), pts->getAt<CoordinateXY>(2));
 
     ensure_equals(a, b);
     ensure_equals(a, c);
@@ -68,7 +67,7 @@ void object::test<2>
     Coordinate c2(10.0, -7.004368924503866);
     Coordinate c3(1.0000000000005, -7.989685402102996);
 
-    CoordinateArraySequence pts;
+    CoordinateSequence pts;
     pts.add(c1);
     pts.add(c2);
     pts.add(c3);

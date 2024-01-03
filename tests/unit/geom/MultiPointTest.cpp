@@ -40,7 +40,7 @@ struct test_multipoint_data {
         , empty_mp_(factory_->createMultiPoint()), mp_size_(5)
     {
         // Create non-empty MultiPoint
-        auto geo = reader_.read("MULTIPOINT(0 0, 5 5, 10 10, 15 15, 20 20)");
+        auto geo = reader_.read("MULTIPOINT((0 0), (5 5), (10 10), (15 15), (20 20))");
         mp_ = dynamic_cast<MultiPointPtr>(geo.release());
     }
 
@@ -373,15 +373,26 @@ template<>
 void object::test<28>
 ()
 {
-    try {
-        auto geo = reader_.read("MULTIPOINT(0 0, 5)");
-        ensure(geo != nullptr);
+    std::vector<std::string> variants{
+        "MULTIPOINT(0 0, 5)",
+        "MULTIPOINT((0 0), (5))",
+        "MULTIPOINT((0 0), 5 0)",
+        "MULTIPOINT(0 0, (5 0))",
+        "MULTIPOINT(0, 5)",
+        "MULTIPOINT((0, 5))",
+    };
 
-        fail("ParseException expected.");
-    }
-    catch(geos::io::ParseException const& e) {
-        const char* msg = e.what(); // ok
-        ensure(msg != nullptr);
+    for (const auto& wkt : variants) {
+        try {
+            auto geo = reader_.read(wkt);
+            ensure(geo != nullptr);
+
+            fail("ParseException expected.");
+        }
+        catch(geos::io::ParseException const& e) {
+            const char* msg = e.what(); // ok
+            ensure(msg != nullptr);
+        }
     }
 }
 
@@ -415,6 +426,17 @@ void object::test<31>
 {
     ensure(empty_mp_->isDimensionStrict(geos::geom::Dimension::P));
     ensure(!empty_mp_->isDimensionStrict(geos::geom::Dimension::L));
+}
+
+// Test of hasDimension()
+template<>
+template<>
+void object::test<32>
+()
+{
+    ensure(mp_->hasDimension(geos::geom::Dimension::P));
+    ensure(!mp_->hasDimension(geos::geom::Dimension::L));
+    ensure(!mp_->hasDimension(geos::geom::Dimension::A));
 }
 
 } // namespace tut

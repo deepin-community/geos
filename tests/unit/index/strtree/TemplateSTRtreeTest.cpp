@@ -39,8 +39,30 @@ struct test_templatestrtree_data {
             for (std::size_t j = 0; j < grid.ny; ++j) {
                 geom::Coordinate c(grid.x0 + grid.dx*static_cast<double>(i),
                                    grid.y0 + grid.dy*static_cast<double>(j));
-                geom::Point* pt = gf->createPoint(c);
-                ret.emplace_back(pt);
+                auto pt = gf->createPoint(c);
+                ret.emplace_back(std::move(pt));
+            }
+        }
+
+        return ret;
+    }
+
+    static std::vector<std::unique_ptr<Geometry>> boxGrid(const Grid & grid) {
+        std::vector<std::unique_ptr<Geometry>> ret;
+
+        auto gf = geom::GeometryFactory::create();
+        for (std::size_t i = 0; i < grid.nx; ++i) {
+            for (std::size_t j = 0; j < grid.ny; ++j) {
+                geom::CoordinateXY ll(grid.x0 + grid.dx*static_cast<double>(i),
+                                      grid.y0 + grid.dy*static_cast<double>(j));
+                geom::CoordinateXY ur(grid.x0 + grid.dx*static_cast<double>(i+1),
+                                      grid.y0 + grid.dy*static_cast<double>(j+1));
+
+                geom::Envelope env(ll, ur);
+
+                auto poly = gf->toGeometry(&env);
+
+                ret.emplace_back(std::move(poly));
             }
         }
 
@@ -382,6 +404,75 @@ void object::test<9>() {
     ensure(matches.size() == 4);
 }
 #endif
+
+// Test short-circuiting by returning false from query callback
+// https://github.com/libgeos/geos/issues/577
+template<>
+template<>
+void object::test<10>() {
+    TemplateSTRtree<void*> tree;
+
+    for (int i = 0; i < 10; i++)
+    {
+        tree.insert(geos::geom::Envelope(i * 10, i * 10 + 10, i * 10, i * 10 + 10), nullptr);
+    }
+
+    for (int i = 0; i < 10; i++)
+    {
+        tree.insert(geos::geom::Envelope(i * 10, i * 10 + 10, -(i * 10), -(i * 10 + 10)), nullptr);
+    }
+
+    std::vector<const void*> hits;
+    tree.query(geos::geom::Envelope(0, 1000, 0, 1000), [&hits](const void* ptr) {
+        hits.push_back(ptr);
+        return false;
+    });
+
+    ensure_equals(hits.size(), 1u);
+}
+
+template<>
+template<>
+void object::test<11>()
+{
+    Grid grid;
+    grid.x0 = grid.y0 = 0;
+    grid.dx = grid.dy = 1;
+    grid.nx = grid.ny = 10;
+
+    auto geoms = boxGrid(grid);
+    auto tree = makeTree<const geom::Geometry*>(geoms);
+
+    std::size_t pairCount1 = 0;
+    std::size_t pairCount2 = 0;
+    std::size_t pairCount3 = 0;
+
+    for (const auto& g1 : geoms) {
+        tree.query(*g1->getEnvelopeInternal(), [&g1, &pairCount1](const Geometry* g2) {
+            if (g2 <= g1.get()) {
+                return;
+            }
+            pairCount1++;
+        });
+    }
+
+    // test with bool-returning callback
+    tree.queryPairs([&pairCount2](const Geometry* g1, const Geometry* g2) {
+        (void) g1; (void) g2;
+        pairCount2++;
+        return true;
+    });
+
+    // test with void callback
+    tree.queryPairs([&pairCount3](const Geometry* g1, const Geometry* g2) {
+        (void) g1; (void) g2;
+        pairCount3++;
+    });
+
+
+    ensure_equals("same number of pairs visited (bool-returning callback)", pairCount1, pairCount2);
+    ensure_equals("same number of pairs visited (void callback)", pairCount1, pairCount3);
+}
 
 
 } // namespace tut

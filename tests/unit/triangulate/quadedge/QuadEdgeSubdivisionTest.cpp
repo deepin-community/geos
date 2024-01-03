@@ -43,7 +43,6 @@ struct test_quadedgesub_data {
         reader(),
         writer()
     {
-        writer.setTrim(true);
     }
 };
 
@@ -85,8 +84,7 @@ template<>
 void object::test<2>
 ()
 {
-    QuadEdgeSubdivision* subdiv;
-    auto sites = reader.read("MULTIPOINT ((150 200), (180 270), (275 163))");
+   auto sites = reader.read("MULTIPOINT ((100 100), (150 200), (200 100))");
     auto siteCoords = DelaunayTriangulationBuilder::extractUniqueCoordinates(*sites);
     Envelope Env = DelaunayTriangulationBuilder::envelope(*siteCoords);
 
@@ -94,22 +92,28 @@ void object::test<2>
     Env.expandBy(expandBy);
 
     IncrementalDelaunayTriangulator::VertexList vertices = DelaunayTriangulationBuilder::toVertices(*siteCoords);
-    subdiv = new quadedge::QuadEdgeSubdivision(Env, 0);
-    IncrementalDelaunayTriangulator triangulator(subdiv);
+    std::unique_ptr<QuadEdgeSubdivision> subdiv(new quadedge::QuadEdgeSubdivision(Env, 0));
+    IncrementalDelaunayTriangulator triangulator(subdiv.get());
+        /**
+     * Avoid creating very narrow triangles along triangulation boundary.
+     * These otherwise can cause malformed Voronoi cells.
+     */
+    triangulator.forceConvex(false);
     triangulator.insertSites(vertices);
 
     //Test for getVoronoiDiagram::
     const GeometryFactory& geomFact(*GeometryFactory::getDefaultInstance());
     std::unique_ptr<GeometryCollection> polys = subdiv->getVoronoiDiagram(geomFact);
-    const char* expected_str =
-        "GEOMETRYCOLLECTION (POLYGON ((-5849.974929324658 2268.0517257497568, -4529.9920486948895 2247.139449440667, 221.20588235294116 210.91176470588235, -684.4227119984187 -2848.644297291955, -5849.974929324658 2268.0517257497568)), POLYGON ((212.5 -3774.5, -684.4227119984187 -2848.644297291955, 221.20588235294116 210.91176470588235, 2448.7167655626645 2188.608343256571, 6235.0370264064295 2248.0370264064295, 212.5 -3774.5)), POLYGON ((-4529.9920486948895 2247.139449440667, 2448.7167655626645 2188.608343256571, 221.20588235294116 210.91176470588235, -4529.9920486948895 2247.139449440667)))";
-//		std::cout << polys->toString() << std::endl;
+//std::cout << polys->toString() << std::endl;
+    ensure(polys->getNumGeometries()== 3);
 
-    auto expected = reader.read(expected_str);
+    // return value depends on subdivision frame vertices
+    auto expected = reader.read(
+                "GEOMETRYCOLLECTION (POLYGON ((150 -3050, 150 137.5, 3375 1750, 4975 1775, 150 -3050)), POLYGON ((-4675 1775, -3075 1750, 150 137.5, 150 -3050, -4675 1775)), POLYGON ((-3075 1750, 3375 1750, 150 137.5, -3075 1750)))"
+    );
     polys->normalize();
     expected->normalize();
-    ensure(polys->equalsExact(expected.get(), 1e-7));
-    delete subdiv;
+    ensure(polys->toString(), polys->equalsExact(expected.get(), 1e-7));
 //		ensure(polys->getCoordinateDimension() == expected->getCoordinateDimension());
 }
 
@@ -158,5 +162,3 @@ template<> template<> void object::test<3>
 }
 
 } // namespace tut
-
-

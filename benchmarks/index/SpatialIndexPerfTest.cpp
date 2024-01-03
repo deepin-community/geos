@@ -22,7 +22,7 @@
 #include <geos/index/quadtree/Quadtree.h>
 #include <geos/index/intervalrtree/SortedPackedIntervalRTree.h>
 
-using geos::geom::Coordinate;
+using geos::geom::CoordinateXY;
 using geos::geom::Envelope;
 using geos::index::intervalrtree::SortedPackedIntervalRTree;
 using geos::index::quadtree::Quadtree;
@@ -65,10 +65,10 @@ static std::vector<Envelope> generate_envelopes(std::default_random_engine & e,
     return envelopes;
 }
 
-std::vector<Coordinate> generate_uniform_points(std::default_random_engine& eng,
+std::vector<CoordinateXY> generate_uniform_points(std::default_random_engine& eng,
                                                 const Envelope& box,
                                                 std::size_t n) {
-    std::vector<Coordinate> pts(n);
+    std::vector<CoordinateXY> pts(n);
 
     std::uniform_real_distribution<> qx(box.getMinX(), box.getMaxX());
     std::uniform_real_distribution<> qy(box.getMinY(), box.getMaxY());
@@ -88,6 +88,22 @@ class CountingVisitor : public geos::index::ItemVisitor {
     size_t hits = 0;
     void visitItem(void* item) override {
         hits += (item != nullptr);
+    }
+};
+
+template<typename T>
+struct Counter {
+    size_t hits = 0;
+
+    void operator()(const T& item) {
+        (void) item;
+        hits++;
+    }
+
+    void operator()(const T& item1, const T& item2) {
+        (void) item1;
+        (void) item2;
+        hits++;
     }
 };
 
@@ -248,6 +264,46 @@ static void BM_STRtree2DQuery(benchmark::State& state) {
     }
 }
 
+static void BM_STRtree2DQueryPairs(benchmark::State& state) {
+    std::default_random_engine eng(12345);
+    Envelope extent(0, 1, 0, 1);
+    auto envelopes = generate_envelopes(eng, extent, 10000);
+    Envelope empty_env;
+
+    TemplateSTRtree<const Envelope*> tree;
+    for (auto& e : envelopes) {
+        tree.insert(&e, &e);
+    }
+    Counter<const Envelope*> q;
+    tree.query(empty_env, q); // query with empty envelope to force construction
+
+    for (auto _ : state) {
+        Counter<const Envelope*> c;
+        tree.queryPairs(c);
+    }
+}
+
+static void BM_STRtree2DQueryPairsNaive(benchmark::State& state) {
+    std::default_random_engine eng(12345);
+    Envelope extent(0, 1, 0, 1);
+    auto envelopes = generate_envelopes(eng, extent, 10000);
+    Envelope empty_env;
+
+    TemplateSTRtree<const Envelope*> tree;
+    for (auto& e : envelopes) {
+        tree.insert(&e, &e);
+    }
+    Counter<const Envelope*> q;
+    tree.query(empty_env, q); // query with empty envelope to force construction
+
+    for (auto _ : state) {
+        Counter<const Envelope*> c;
+        for (const auto& env : envelopes) {
+            tree.query(env, c);
+        }
+    }
+}
+
 template<class Tree>
 static void BM_STRtree2DNearest(benchmark::State& state) {
     std::default_random_engine eng(12345);
@@ -297,6 +353,9 @@ BENCHMARK_TEMPLATE(BM_STRtree2DQuery, Quadtree);
 BENCHMARK_TEMPLATE(BM_STRtree2DQuery, STRtree);
 BENCHMARK_TEMPLATE(BM_STRtree2DQuery, SimpleSTRtree);
 BENCHMARK_TEMPLATE(BM_STRtree2DQuery, TemplateSTRtree<const Envelope*>);
+
+BENCHMARK(BM_STRtree2DQueryPairs);
+BENCHMARK(BM_STRtree2DQueryPairsNaive);
 
 BENCHMARK_MAIN();
 

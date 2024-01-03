@@ -4,14 +4,16 @@ Uploaders: Francesco Paolo Lovergine <frankie@debian.org>,
            Bas Couwenberg <sebastic@debian.org>
 Section: science
 Priority: optional
-Build-Depends: debhelper-compat (= 12),
+Build-Depends: debhelper-compat (= 13),
+               dh-sequence-pkgkde-symbolshelper,
                cmake,
                doxygen,
                pkg-kde-tools
-Standards-Version: 4.6.0
+Standards-Version: 4.6.2
 Vcs-Browser: https://salsa.debian.org/debian-gis-team/geos
 Vcs-Git: https://salsa.debian.org/debian-gis-team/geos.git
 Homepage: https://trac.osgeo.org/geos/
+Rules-Requires-Root: no
 
 Package: libgeos-dev
 Architecture: any
@@ -30,7 +32,7 @@ Description: Geometry engine for GIS - Development files
 Package: libgeos++-dev
 Architecture: any
 Section: libdevel
-Depends: libgeos3.10.1 (= ${binary:Version}),
+Depends: libgeos3.12.1 (= ${binary:Version}),
          libgeos-dev,
          ${misc:Depends}
 Suggests: libgdal-doc
@@ -69,7 +71,7 @@ Description: Geometry engine for Geographic Information Systems - C Library
  .
  This package contains the C library.
 
-Package: libgeos3.10.1
+Package: libgeos3.12.1
 Architecture: any
 Multi-Arch: same
 Section: libs

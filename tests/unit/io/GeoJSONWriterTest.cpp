@@ -12,7 +12,6 @@
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryCollection.h>
 #include <geos/geom/Coordinate.h>
-#include <geos/geom/CoordinateArraySequence.h>
 // std
 #include <sstream>
 #include <string>
@@ -251,5 +250,61 @@ void object::test<14>
     std::string result = geojsonwriter.write(features);
     ensure_equals(result, "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[-117.0,33.0]},\"properties\":{\"id\":1.0,\"name\":\"One\"}},{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[-127.0,53.0]},\"properties\":{\"id\":2.0,\"name\":\"Two\"}}]}");
 }
+
+// Write an empty point
+template<>
+template<>
+void object::test<15>
+()
+{
+    GeomPtr geom(wktreader.read("POINT EMPTY"));
+    std::string result = geojsonwriter.write(geom.get());
+    ensure_equals(result, "{\"type\":\"Point\",\"coordinates\":[]}");
+}
+
+// Write an empty linestring
+template<>
+template<>
+void object::test<16>
+()
+{
+    GeomPtr geom(wktreader.read("LINESTRING EMPTY"));
+    std::string result = geojsonwriter.write(geom.get());
+    ensure_equals(result, "{\"type\":\"LineString\",\"coordinates\":[]}");
+}
+
+// Write an empty polygon
+template<>
+template<>
+void object::test<17>
+()
+{
+    GeomPtr geom(wktreader.read("POLYGON EMPTY"));
+    std::string result = geojsonwriter.write(geom.get());
+    ensure_equals(result, "{\"type\":\"Polygon\",\"coordinates\":[[]]}");
+}
+
+// Write an empty polygon
+template<>
+template<>
+void object::test<18>
+()
+{
+    GeomPtr geom(wktreader.read("GEOMETRYCOLLECTION EMPTY"));
+    std::string result = geojsonwriter.write(geom.get());
+    ensure_equals(result, "{\"type\":\"GeometryCollection\",\"geometries\":[]}");
+}
+
+// Write a linear ring (as a linestring)
+template<>
+template<>
+void object::test<19>
+()
+{
+    GeomPtr geom(wktreader.read("LINEARRING (0 0, 1 1, 1 0, 0 0)"));
+    std::string result = geojsonwriter.write(geom.get());
+    ensure_equals(result, "{\"type\":\"LineString\",\"coordinates\":[[0.0,0.0],[1.0,1.0],[1.0,0.0],[0.0,0.0]]}");
+}
+
 
 }

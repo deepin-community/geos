@@ -12,11 +12,11 @@
 // tut
 #include <tut/tut.hpp>
 #include <tut/tut_macros.hpp>
+#include <utility.h>
 // geos
 #include <geos/profiler.h>
 #include <geos/constants.h>
 #include <geos/geom/Coordinate.h>
-#include <geos/geom/CoordinateArraySequence.h>
 #include <geos/geom/CoordinateSequence.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryFactory.h>
@@ -32,6 +32,9 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+
+using geos::operation::distance::IndexedFacetDistance;
+using geos::geom::Coordinate;
 
 namespace tut {
 //
@@ -58,20 +61,34 @@ struct test_facetdistanceop_data {
     {}
 
     void
-    checkDistanceNearestPoints(std::string wkt1, std::string wkt2, double distance,
-                               geos::geom::Coordinate& p1, geos::geom::Coordinate& p2)
+    checkDistanceNearestPoints(std::string wkt1, std::string wkt2, double distanceExpected,
+                               const geos::geom::Coordinate& p1, 
+                               const geos::geom::Coordinate& p2)
     {
         using geos::operation::distance::IndexedFacetDistance;
         GeomPtr g1(_wktreader.read(wkt1));
         GeomPtr g2(_wktreader.read(wkt2));
-        std::vector<geos::geom::Coordinate> pts;
-        pts = IndexedFacetDistance::nearestPoints(g1.get(), g2.get());
-        ensure(fabs(pts[0].distance(pts[1])-distance) < 1e08);
-        ensure(fabs(pts[0].x - p1.x) < 1e-08);
-        ensure(fabs(pts[0].y - p1.y) < 1e-08);
-        ensure(fabs(pts[1].x - p2.x) < 1e-08);
-        ensure(fabs(pts[1].y - p2.y) < 1e-08);
-        return;
+        auto pts = IndexedFacetDistance::nearestPoints(g1.get(), g2.get());
+        const Coordinate p1Actual = (*pts)[0];
+        const Coordinate p2Actual = (*pts)[1];
+        double distResult = (*pts)[0].distance((*pts)[1]);
+
+        ensure_equals("Distance", distResult, distanceExpected, 1e-4);
+        ensure_equals_xy(p1Actual, p1, 1e-08);
+        ensure_equals_xy(p2Actual, p2, 1e-08);
+    }
+
+    void
+    checkWithinDistance(std::string wkt1, std::string wkt2, double distance,
+                               bool expected)
+    {
+        using geos::operation::distance::IndexedFacetDistance;
+        std::unique_ptr<geos::geom::Geometry> g1(_wktreader.read(wkt1));
+        std::unique_ptr<geos::geom::Geometry> g2(_wktreader.read(wkt2));
+
+        IndexedFacetDistance ifd(g1.get());
+        bool result = ifd.isWithinDistance(g2.get(), distance);
+        ensure_equals(result, expected);
     }
 
     int
@@ -91,20 +108,18 @@ struct test_facetdistanceop_data {
     std::unique_ptr<geos::geom::LineString>
     makeSinCircle(std::size_t nvertices, double radius, double amplitude)
     {
-        geos::geom::CoordinateArraySequence cs;
+        auto cs = geos::detail::make_unique<geos::geom::CoordinateSequence>();
         std::vector<geos::geom::Coordinate> coords;
         for (std::size_t i = 0; i < nvertices; i++) {
             geos::geom::Coordinate c;
             double angle = (double)i*360.0/(double)nvertices;
             angle2sincircle(angle, radius, amplitude, &c.x, &c.y);
-            cs.add(c);
+            cs->add(c);
         }
 
-        std::unique_ptr<geos::geom::LineString> ls(_factory->createLineString(cs));
+        auto ls = _factory->createLineString(std::move(cs));
         return ls;
     }
-
-
 
 };
 
@@ -240,8 +255,13 @@ void object::test<8>
     GeomPtr g0(_wktreader.read(wkt0));
     GeomPtr g1(_wktreader.read(wkt1));
     IndexedFacetDistance ifd(g0.get());
-    double d = ifd.distance(g1.get());
-    ensure_equals(d, 50);
+    double expected_distance = 50;
+
+    double actual_distance = ifd.distance(g1.get());
+    ensure_equals(actual_distance, expected_distance);
+
+    ensure(ifd.isWithinDistance(g1.get(), expected_distance));
+    ensure(!ifd.isWithinDistance(g1.get(), expected_distance - 1e-6));
 }
 
 // Invalid polygon collapsed to a line
@@ -259,9 +279,9 @@ void object::test<9>
     double d = ifd.distance(g1.get());
     ensure_equals("incorrect distance", d, 0.0, 0.001);
 
-    std::vector<geos::geom::Coordinate> nearestPts = ifd.nearestPoints(g1.get());
-    ensure_equals("nearest points x", nearestPts[0].x, nearestPts[1].x, 0.00001);
-    ensure_equals("nearest points y", nearestPts[0].y, nearestPts[1].y, 0.00001);
+    auto nearestPts = ifd.nearestPoints(g1.get());
+    ensure_equals("nearest points x", (*nearestPts)[0].x, (*nearestPts)[1].x, 0.00001);
+    ensure_equals("nearest points y", (*nearestPts)[0].y, (*nearestPts)[1].y, 0.00001);
 }
 
 // Invalid polygon collapsed to a line
@@ -379,7 +399,81 @@ void object::test<11>
     catch (const GEOSException&) { }
 }
 
+// Test with Inf coords
+template<>
+template<>
+void object::test<12>()
+{
+    auto g1 = _wktreader.read("POINT (0 0)");
+    auto g2 = _wktreader.read("LINESTRING (3 Inf, 5 Inf)");
 
+    IndexedFacetDistance ifd1(g1.get());
+
+    auto pts = ifd1.nearestPoints(g2.get());
+    ensure_equals(pts->size(), 2u);
+
+    auto ls = _factory->createLineString(std::move(pts));
+    ls->normalize();
+
+    const auto& normPts = *ls->getCoordinatesRO();
+
+    ensure_equals(normPts.getX(0), 0);
+    ensure_equals(normPts.getY(0), 0);
+    ensure_equals(normPts.getY(1), geos::DoubleInfinity);
+}
+
+
+// Indexed multiline with one element within line envelope.
+template<>
+template<>
+void object::test<13>()
+{
+    checkWithinDistance(
+        "MULTILINESTRING ((1 6, 1 1), (11 14, 11 11))",
+        "LINESTRING (10 10, 10 20, 30 20)",
+        2,
+        true
+    );
+}
+
+// Indexed multiline with one element within multiline envelope and close to inner line.
+template<>
+template<>
+void object::test<14>()
+{
+    checkWithinDistance(
+        "MULTILINESTRING ((1 6, 1 1), (16 16, 19 13))",
+        "MULTILINESTRING ((10 10, 10 20, 30 20), (20 13, 20 16))",
+        2,
+        true
+    );
+}
+
+// Indexed multiline with one element within line envelope.
+template<>
+template<>
+void object::test<15>
+()
+{
+    checkDistanceNearestPoints(
+        "MULTILINESTRING ((1 6, 1 1), (11 15, 13 17))", 
+        "LINESTRING (10 10, 10 20, 30 20)", 
+        1, Coordinate{11, 15}, Coordinate{10, 15}
+    );
+}
+
+// Indexed multiline with one element within line envelope.
+template<>
+template<>
+void object::test<16>
+()
+{
+    checkDistanceNearestPoints(
+        "MULTILINESTRING ((6 6, 7 7), (100 100, 101 101))", 
+        "LINESTRING (0 10, 10 0)", 
+        1.41421, Coordinate{6, 6}, Coordinate{5, 5}
+    );
+}
 
 // TODO: finish the tests by adding:
 // 	LINESTRING - *all*
